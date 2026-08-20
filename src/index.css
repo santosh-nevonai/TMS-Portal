@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sb-radius: 10px;
+
+    /* ---- Semantic surface / text / line tokens (LIGHT) --------------- */
+    /* Stored as space-separated RGB channels so Tailwind's <alpha-value>
+       opacity modifiers (e.g. bg-surface/70) keep working. */
+    --c-canvas: 246 247 249;
+    --c-surface: 255 255 255;
+
+    --c-ink-900: 15 23 42;
+    --c-ink-700: 51 65 85;
+    --c-ink-500: 100 116 139;
+    --c-ink-400: 148 163 184;
+    --c-ink-300: 203 213 225;
+
+    --c-line: 231 234 238;
+    --c-line-soft: 238 241 244;
+    --c-line-strong: 214 219 225;
+
+    --c-neutralst-50: 241 243 245;
+    --c-neutralst-100: 226 230 234;
+    --c-neutralst-500: 100 116 139;
+    --c-neutralst-600: 71 85 105;
+
+    /* Brand accent — defaults to Blue. Overridden at runtime by the theme
+       provider when a different accent is chosen. */
+    --c-brand-50: 238 244 255;
+    --c-brand-100: 217 230 255;
+    --c-brand-200: 183 206 255;
+    --c-brand-300: 138 174 255;
+    --c-brand-400: 91 132 245;
+    --c-brand-500: 46 91 230;
+    --c-brand-600: 30 69 200;
+    --c-brand-700: 24 54 161;
+    --c-brand-800: 22 46 130;
+
+    /* Scrollbar colors (theme-aware) */
+    --sc-thumb: #CBD5E1;
+    --sc-thumb-hover: #94A3B8;
+
+    /* ---- Sidebar tokens — dark treatment by default ------------------ */
+    --sb-bg: #0E1524;
+    --sb-bg-elevated: #131C30;
+    --sb-border: #18233B;
+    --sb-fg: #94A3B8;
+    --sb-fg-muted: #64789C;
+    --sb-fg-subtle: #3D5480;
+    --sb-fg-strong: #FFFFFF;
+    --sb-hover-bg: #18233B;
+    --sb-active-bg: rgba(34, 48, 79, 0.7);
+    --sb-scroll-thumb: #22304F;
+  }
+
+  /* =================================================================== */
+  /* DARK MODE                                                           */
+  /* =================================================================== */
+  .dark {
+    --c-canvas: 9 13 21;
+    --c-surface: 19 26 40;
+
+    --c-ink-900: 241 245 249;
+    --c-ink-700: 203 213 225;
+    --c-ink-500: 148 163 184;
+    --c-ink-400: 100 116 139;
+    --c-ink-300: 71 85 105;
+
+    --c-line: 31 42 60;
+    --c-line-soft: 26 37 54;
+    --c-line-strong: 44 58 84;
+
+    --c-neutralst-50: 26 37 54;
+    --c-neutralst-100: 36 50 74;
+    --c-neutralst-500: 148 163 184;
+    --c-neutralst-600: 170 185 205;
+
+    --sc-thumb: #2A3852;
+    --sc-thumb-hover: #3D5480;
+
+    color-scheme: dark;
+  }
+
+  /* ---- Sidebar: independent LIGHT treatment ------------------------- */
+  [data-sidebar-theme='light'] {
+    --sb-bg: #FFFFFF;
+    --sb-bg-elevated: #F1F3F5;
+    --sb-border: #E7EAEE;
+    --sb-fg: #475569;
+    --sb-fg-muted: #64748B;
+    --sb-fg-subtle: #94A3B8;
+    --sb-fg-strong: #0F172A;
+    --sb-hover-bg: #F1F3F5;
+    --sb-active-bg: rgb(var(--c-brand-50));
+    --sb-scroll-thumb: #CBD5E1;
+  }
+
+  /* ---- Sidebar: explicit DARK treatment (also the :root default) ---- */
+  [data-sidebar-theme='dark'] {
+    --sb-bg: #0E1524;
+    --sb-bg-elevated: #131C30;
+    --sb-border: #18233B;
+    --sb-fg: #94A3B8;
+    --sb-fg-muted: #64789C;
+    --sb-fg-subtle: #3D5480;
+    --sb-fg-strong: #FFFFFF;
+    --sb-hover-bg: #18233B;
+    --sb-active-bg: rgba(34, 48, 79, 0.7);
+    --sb-scroll-thumb: #22304F;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-canvas text-ink-900 font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sc-thumb) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--sc-thumb);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--sc-thumb-hover);
+    background-clip: content-box;
+  }
+
+  /* Dark scrollbar within navy / sidebar surfaces */
+  .scroll-dark::-webkit-scrollbar-thumb {
+    background: var(--sb-scroll-thumb);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface border border-line rounded-card shadow-card;
+  }
+
+  .focus-ring {
+    @apply outline-none ring-2 ring-brand-500/35 ring-offset-1 ring-offset-surface;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .animate-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    animation: shimmer 1.4s infinite;
+  }
+
+  .grid-dots {
+    background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+}
