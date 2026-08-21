@@ -107,10 +107,41 @@ export default {
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
         },
+        // Login stage — floating soundbox devices + audio motion
+        float: {
+          '0%,100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-14px)' },
+        },
+        'float-sm': {
+          '0%,100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        ripple: {
+          '0%': { transform: 'scale(0.65)', opacity: '0.5' },
+          '100%': { transform: 'scale(2.3)', opacity: '0' },
+        },
+        eq: {
+          '0%,100%': { transform: 'scaleY(0.3)' },
+          '50%': { transform: 'scaleY(1)' },
+        },
+        'drift-up': {
+          '0%': { transform: 'translateY(18px)', opacity: '0' },
+          '12%,80%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(-18px)', opacity: '0' },
+        },
+        'spin-slow': {
+          to: { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.18s ease-out',
         'slide-in': 'slide-in 0.22s cubic-bezier(0.16,1,0.3,1)',
+        float: 'float 6s ease-in-out infinite',
+        'float-sm': 'float-sm 5s ease-in-out infinite',
+        ripple: 'ripple 3s ease-out infinite',
+        eq: 'eq 1.1s ease-in-out infinite',
+        'drift-up': 'drift-up 5.5s ease-in-out infinite',
+        'spin-slow': 'spin-slow 44s linear infinite',
       },
     },
   },

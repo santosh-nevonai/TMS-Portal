@@ -63,15 +63,12 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
     >
       {/* Brand */}
       <div className={cn('flex h-14 items-center gap-2.5 border-b border-[var(--sb-border)] px-3.5', collapsed && 'justify-center px-0')}>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-500 shadow-sm">
-          <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none">
-            <path d="M16 7v18M11 11v10M21 11v10M7 14.5v3M25 14.5v3" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
-          </svg>
-        </div>
-        {!collapsed && (
+       <div className=''><img src='./logo/logo.png' className="h-8 w-8" alt="Logo" /></div>
+        {
+        !collapsed && (
           <div className="min-w-0">
-            <div className="text-[13px] font-bold leading-tight text-[var(--sb-fg-strong)]">Nevon FleetOps</div>
-            <div className="text-2xs text-[var(--sb-fg-muted)]">Soundbox Platform</div>
+            <div className="text-[15px] font-bold leading-tight text-[var(--sb-fg-strong)]">NevonAI</div>
+            <div className="text-2xs text-[var(--sb-fg-muted)]">Payment Audio Platform</div>
           </div>
         )}
       </div>
