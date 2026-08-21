@@ -1,12 +1,41 @@
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { ShieldCheck, ArrowRight, Cpu, Wifi, Radio, Activity } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { ShieldCheck, ArrowRight, Cpu, Wifi, Radio, Activity, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/primitives';
+import { authenticate, isAuthenticated, DEMO_USERS } from '@/lib/auth';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('santosh.kumar@nevonai.com');
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from ?? '/';
+
+  const [email, setEmail] = useState('admin@nevonai.com');
   const [pw, setPw] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // Already signed in? Skip the login screen.
+  useEffect(() => {
+    if (isAuthenticated()) navigate('/', { replace: true });
+  }, [navigate]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const session = authenticate(email, pw);
+    if (!session) {
+      setError('Invalid email or password. Use one of the demo accounts below.');
+      setSubmitting(false);
+      return;
+    }
+    navigate(from, { replace: true });
+  };
+
+  const fillDemo = (demoEmail: string, demoPw: string) => {
+    setEmail(demoEmail);
+    setPw(demoPw);
+    setError('');
+  };
 
   return (
     <div className="flex min-h-screen bg-canvas">
@@ -59,37 +88,75 @@ export default function Login() {
           <h2 className="text-xl font-bold text-ink-900">Sign in</h2>
           <p className="mt-1 text-[13px] text-ink-500">Access the Soundbox operations console.</p>
 
-          <form
-            className="mt-6 space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              navigate('/');
-            }}
-          >
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="text-[13px] font-medium text-ink-700">Work email</label>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" className="mt-1 h-10 w-full rounded-lg border border-line-strong px-3 text-sm outline-none focus-visible:focus-ring" />
+              <input
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                type="email"
+                autoComplete="username"
+                className="mt-1 h-10 w-full rounded-lg border border-line-strong px-3 text-sm outline-none focus-visible:focus-ring"
+              />
             </div>
             <div>
               <div className="flex items-center justify-between">
                 <label className="text-[13px] font-medium text-ink-700">Password</label>
                 <a href="#" className="text-2xs font-medium text-brand-600 hover:underline">Forgot?</a>
               </div>
-              <input value={pw} onChange={(e) => setPw(e.target.value)} type="password" placeholder="••••••••" className="mt-1 h-10 w-full rounded-lg border border-line-strong px-3 text-sm outline-none focus-visible:focus-ring" />
+              <input
+                value={pw}
+                onChange={(e) => { setPw(e.target.value); setError(''); }}
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className="mt-1 h-10 w-full rounded-lg border border-line-strong px-3 text-sm outline-none focus-visible:focus-ring"
+              />
             </div>
+
+            {error && (
+              <div className="flex items-start gap-2 rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-2xs text-danger-700">
+                <AlertCircle size={14} className="mt-px shrink-0 text-danger-500" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <label className="flex items-center gap-2 text-[13px] text-ink-600">
               <input type="checkbox" className="h-3.5 w-3.5 rounded border-line-strong text-brand-600" /> Keep me signed in on this device
             </label>
-            <Button type="submit" variant="primary" size="lg" className="w-full">
+            <Button type="submit" variant="primary" size="lg" className="w-full" disabled={submitting}>
               Sign in <ArrowRight size={15} />
             </Button>
           </form>
 
-          <div className="mt-5 flex items-center gap-2 rounded-lg border border-line bg-neutralst-50 px-3 py-2.5 text-2xs text-ink-500">
-            <ShieldCheck size={15} className="shrink-0 text-ok-600" />
-            Protected by SSO & MFA. All actions on this platform are audited.
+          {/* Demo credentials */}
+          <div className="mt-5 rounded-lg border border-line bg-neutralst-50 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-2xs font-semibold uppercase tracking-wide text-ink-500">Demo accounts</span>
+              <span className="text-2xs text-ink-400">click to autofill</span>
+            </div>
+            <div className="space-y-1.5">
+              {DEMO_USERS.map((u) => (
+                <button
+                  key={u.email}
+                  type="button"
+                  onClick={() => fillDemo(u.email, u.password)}
+                  className="flex w-full items-center justify-between rounded-md border border-line bg-surface px-2.5 py-1.5 text-left transition-colors hover:border-brand-300 hover:bg-brand-50"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13px] font-medium text-ink-800">{u.email}</span>
+                    <span className="block text-2xs text-ink-500">{u.role}</span>
+                  </span>
+                  <span className="ml-2 shrink-0 rounded bg-neutralst-100 px-1.5 py-0.5 font-mono text-2xs text-ink-600">{u.password}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <p className="mt-6 text-center text-2xs text-ink-400">Demo build — enter any credentials to continue.</p>
+
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-line bg-neutralst-50 px-3 py-2.5 text-2xs text-ink-500">
+            <ShieldCheck size={15} className="shrink-0 text-ok-600" />
+            Demo build — credentials above are for evaluation only. All actions are audited.
+          </div>
         </div>
       </div>
     </div>

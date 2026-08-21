@@ -77,7 +77,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2.5 py-3">
+      <nav className="scroll-hover flex-1 overflow-y-auto px-2.5 py-3">
         {NAV.map((section) => (
           <div key={section.title} className="mb-4">
             {!collapsed && (

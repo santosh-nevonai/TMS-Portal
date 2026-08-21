@@ -24,6 +24,7 @@ export default function DeviceDetail() {
   const device = DEVICES.find((d) => d.id === id) ?? DEVICES[0];
   const [tab, setTab] = useState<Tab>('overview');
   const [confirmBlock, setConfirmBlock] = useState(false);
+  const [confirmReboot, setConfirmReboot] = useState(false);
   const tone = deviceTone(device.status);
 
   return (
@@ -59,7 +60,7 @@ export default function DeviceDetail() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <Button variant="secondary" size="sm"><RotateCw size={14} /> Reboot</Button>
+          <Button variant="secondary" size="sm" onClick={() => setConfirmReboot(true)}><RotateCw size={14} /> Reboot</Button>
           <Button variant="secondary" size="sm"><VolumeX size={14} /> Mute</Button>
           <Button variant="secondary" size="sm"><Volume2 size={14} /> Volume</Button>
           <Button variant="secondary" size="sm" disabled={!device.hasGps}><MapPin size={14} /> Locate</Button>
@@ -121,6 +122,20 @@ export default function DeviceDetail() {
           { label: 'Device', value: device.id },
           { label: 'Merchant', value: device.merchant },
           { label: 'Region', value: device.region },
+        ]}
+      />
+
+      <ConfirmDialog
+        open={confirmReboot}
+        onClose={() => setConfirmReboot(false)}
+        onConfirm={() => {}}
+        title="Reboot Soundbox?"
+        description="A reboot command will be sent to the device. It will go offline for roughly 30–60 seconds and cannot play payment announcements until it is back online."
+        confirmLabel="Reboot Device"
+        details={[
+          { label: 'Device', value: device.id },
+          { label: 'Merchant', value: device.merchant },
+          { label: 'Status', value: device.status },
         ]}
       />
     </div>
@@ -283,6 +298,7 @@ const FLOW_STEPS: { key: CommandStatus; label: string }[] = [
 ];
 function CommandsTab() {
   const [running, setRunning] = useState<{ cmd: string; step: number } | null>(null);
+  const [pendingReboot, setPendingReboot] = useState(false);
 
   const runCommand = (cmd: string) => {
     setRunning({ cmd, step: 0 });
@@ -318,7 +334,7 @@ function CommandsTab() {
             {commands.map((c) => (
               <button
                 key={c.label}
-                onClick={() => runCommand(c.label)}
+                onClick={() => (c.label === 'Reboot Device' ? setPendingReboot(true) : runCommand(c.label))}
                 disabled={!!running}
                 className={cn(
                   'flex items-center gap-2 rounded-lg border px-2.5 py-2 text-[13px] font-medium transition-colors disabled:opacity-50',
@@ -401,6 +417,15 @@ function CommandsTab() {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingReboot}
+        onClose={() => setPendingReboot(false)}
+        onConfirm={() => runCommand('Reboot Device')}
+        title="Reboot Soundbox?"
+        description="A reboot command will be dispatched over MQTT. The device will go offline for roughly 30–60 seconds and cannot play payment announcements until it is back online."
+        confirmLabel="Reboot Device"
+      />
     </div>
   );
 }
