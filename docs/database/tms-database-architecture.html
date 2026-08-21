@@ -1,0 +1,1111 @@
+<title>TMS Database Blueprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#eef1f5; --surface:#ffffff; --surface-2:#f6f8fb; --surface-3:#eef2f7;
+    --ink:#131922; --ink-2:#43505f; --ink-3:#6b7889;
+    --border:#dce2ea; --border-strong:#c3ccd7;
+    --accent:#0f7d78; --accent-ink:#0b5b57; --accent-soft:#dbefed;
+    --good:#1f9d63; --warn:#a9761a; --crit:#c04434; --info:#2f74c0;
+    --blueprint:#0e2430; --blueprint-ink:#cfe6ea;
+    --shadow:0 1px 2px rgba(16,25,40,.05),0 8px 24px -12px rgba(16,25,40,.18);
+    --radius:10px;
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0c1016; --surface:#141a23; --surface-2:#1a212c; --surface-3:#202836;
+      --ink:#e7ecf3; --ink-2:#aeb9c7; --ink-3:#7a8697;
+      --border:#252e3a; --border-strong:#35414f;
+      --accent:#34b3ac; --accent-ink:#74d6d0; --accent-soft:#123130;
+      --good:#42bf82; --warn:#d19f45; --crit:#e0685a; --info:#5b9be0;
+      --blueprint:#0a1a22; --blueprint-ink:#bfe0e5;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0c1016; --surface:#141a23; --surface-2:#1a212c; --surface-3:#202836;
+    --ink:#e7ecf3; --ink-2:#aeb9c7; --ink-3:#7a8697;
+    --border:#252e3a; --border-strong:#35414f;
+    --accent:#34b3ac; --accent-ink:#74d6d0; --accent-soft:#123130;
+    --good:#42bf82; --warn:#d19f45; --crit:#e0685a; --info:#5b9be0;
+    --blueprint:#0a1a22; --blueprint-ink:#bfe0e5;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  h1,h2,h3,h4{line-height:1.2;text-wrap:balance;margin:0}
+  code{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--surface-3);
+    padding:.1em .4em;border-radius:5px;color:var(--ink)}
+
+  /* layout */
+  .app{display:grid;grid-template-columns:264px minmax(0,1fr);min-height:100vh}
+  .side{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+    background:var(--surface);border-right:1px solid var(--border);padding:22px 16px;display:flex;flex-direction:column;gap:4px}
+  .brand{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
+  .brand .mark{font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.14em;
+    font-size:11px;text-transform:uppercase;color:var(--accent-ink)}
+  .brand .name{font-weight:700;font-size:18px;letter-spacing:-.01em}
+  .brand .sub{font-size:12px;color:var(--ink-3)}
+  .nav a{display:block;padding:6px 10px;border-radius:7px;color:var(--ink-2);font-size:13.5px}
+  .nav a:hover{background:var(--surface-2);color:var(--ink);text-decoration:none}
+  .nav a.active{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+  .nav .grouplabel{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink-3);margin:14px 10px 4px}
+  .themebtn{margin-top:auto;display:flex;align-items:center;gap:8px;background:var(--surface-2);
+    border:1px solid var(--border);color:var(--ink-2);border-radius:8px;padding:8px 10px;cursor:pointer;
+    font-family:inherit;font-size:12.5px}
+  .themebtn:hover{border-color:var(--border-strong);color:var(--ink)}
+
+  main{padding:0 clamp(20px,4vw,56px) 120px;max-width:1180px}
+  section{padding-top:56px;scroll-margin-top:20px}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-ink);font-weight:600;margin-bottom:10px}
+  h2.title{font-size:clamp(24px,3.4vw,34px);letter-spacing:-.02em;margin-bottom:6px}
+  .lead{color:var(--ink-2);font-size:16px;max-width:68ch}
+  h3{font-size:19px;letter-spacing:-.01em;margin:30px 0 8px}
+  h4{font-size:15px;margin:20px 0 6px}
+  p{margin:8px 0;max-width:74ch;color:var(--ink-2)}
+  main p strong,li strong{color:var(--ink)}
+  ul,ol{margin:8px 0;padding-left:22px;color:var(--ink-2);max-width:74ch}
+  li{margin:4px 0}
+
+  /* hero */
+  .hero{padding-top:64px}
+  .hero h1{font-size:clamp(30px,5vw,52px);letter-spacing:-.03em}
+  .hero .kmeta{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px}
+  .chip{font-family:"IBM Plex Mono",monospace;font-size:12px;background:var(--surface);
+    border:1px solid var(--border);border-radius:999px;padding:5px 12px;color:var(--ink-2)}
+  .chip b{color:var(--ink)}
+
+  /* stat row */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:24px 0}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .n{font-size:26px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+  .stat .n.accent{color:var(--accent-ink)}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow)}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .callout{border-left:3px solid var(--accent);background:var(--surface-2);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0}
+  .callout.warn{border-color:var(--warn)}
+  .callout.good{border-color:var(--good)}
+  .callout .k{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
+
+  /* tables */
+  .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);margin:16px 0;box-shadow:var(--shadow)}
+  table.data{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--surface)}
+  table.data th,table.data td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+  table.data th{background:var(--surface-2);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600;position:sticky;top:0}
+  table.data td{color:var(--ink-2)}
+  table.data tr:last-child td{border-bottom:0}
+  table.data td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace}
+  table.data td b{color:var(--ink)}
+
+  .tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;
+    padding:2px 7px;border-radius:5px;letter-spacing:.03em;vertical-align:middle}
+  .tag.pk{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+  .tag.fk{background:color-mix(in srgb,var(--info) 20%,transparent);color:var(--info)}
+  .tag.uk{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--accent-ink)}
+  .tag.part{background:color-mix(in srgb,var(--crit) 18%,transparent);color:var(--crit)}
+  .tag.agg{background:color-mix(in srgb,#8256c4 22%,transparent);color:#8256c4}
+
+  /* schema legend */
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+  .lg{display:flex;align-items:center;gap:7px;font-size:12.5px;background:var(--surface);border:1px solid var(--border);
+    padding:5px 11px;border-radius:999px;cursor:pointer;user-select:none;color:var(--ink-2)}
+  .lg .dot{width:9px;height:9px;border-radius:50%}
+  .lg.off{opacity:.4}
+  .lg:hover{border-color:var(--border-strong)}
+
+  /* explorer toolbar */
+  .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:14px 0 6px;position:sticky;top:0;z-index:5;
+    background:var(--ground);padding:10px 0}
+  .search{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);
+    border-radius:9px;padding:8px 12px}
+  .search input{border:0;background:transparent;outline:none;color:var(--ink);font-family:inherit;font-size:14px;width:100%}
+  .search svg{flex:none;color:var(--ink-3)}
+  .btn{font-family:inherit;font-size:13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:8px 12px;color:var(--ink-2);cursor:pointer}
+  .btn:hover{border-color:var(--border-strong);color:var(--ink)}
+  .count{font-size:12.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+
+  /* explorer grid */
+  #explorer{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;align-items:start}
+  .tbl{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+    box-shadow:var(--shadow);border-top:3px solid var(--sc);transition:opacity .15s,box-shadow .15s,transform .1s}
+  .tbl.hidden{display:none}
+  .tbl.dim{opacity:.28}
+  .tbl.sel{outline:2px solid var(--sc);outline-offset:1px}
+  .tbl.rel{box-shadow:0 0 0 2px color-mix(in srgb,var(--sc) 55%,transparent),var(--shadow)}
+  .tbl .head{padding:11px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:color-mix(in srgb,var(--sc) 8%,var(--surface))}
+  .tbl .head:hover{background:color-mix(in srgb,var(--sc) 14%,var(--surface))}
+  .tbl .tname{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;color:var(--ink);word-break:break-all}
+  .tbl .tschema{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--sc);font-weight:600}
+  .tbl .flags{display:flex;gap:4px;flex-none}
+  .tbl .cols{list-style:none;margin:0;padding:0}
+  .col{display:flex;align-items:center;gap:8px;padding:6px 14px;border-top:1px solid var(--border);font-size:12.5px}
+  .col:hover{background:var(--surface-2)}
+  .col .cn{font-family:"IBM Plex Mono",monospace;color:var(--ink);font-weight:500}
+  .col .ct{font-family:"IBM Plex Mono",monospace;color:var(--ink-3);font-size:11.5px;margin-left:auto}
+  .col.hit .cn{color:var(--accent-ink)}
+  .col .keys{display:flex;gap:3px}
+  .fkchip{cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--info);
+    border:1px solid color-mix(in srgb,var(--info) 40%,transparent);border-radius:5px;padding:1px 5px}
+  .fkchip:hover{background:color-mix(in srgb,var(--info) 15%,transparent)}
+  .tbl .foot{padding:8px 14px;border-top:1px solid var(--border);background:var(--surface-2);font-size:11.5px;color:var(--ink-3);
+    display:flex;flex-wrap:wrap;gap:6px 14px}
+  .tbl .foot b{color:var(--ink-2);font-weight:600}
+
+  /* relations panel */
+  #relpanel{position:fixed;right:18px;bottom:18px;width:300px;max-height:64vh;overflow:auto;background:var(--surface);
+    border:1px solid var(--border-strong);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px;display:none;z-index:20}
+  #relpanel.show{display:block}
+  #relpanel h4{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink)}
+  #relpanel .close{position:absolute;top:10px;right:12px;cursor:pointer;color:var(--ink-3);border:0;background:none;font-size:16px}
+  #relpanel .rl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 4px;font-family:"IBM Plex Mono",monospace}
+  #relpanel .ri{display:block;font-family:"IBM Plex Mono",monospace;font-size:12px;padding:3px 0;color:var(--ink-2);cursor:pointer}
+  #relpanel .ri:hover{color:var(--accent-ink)}
+  #relpanel .ri .via{color:var(--ink-3)}
+
+  /* blueprint (mermaid) panel */
+  .blueprint{background:var(--blueprint);border:1px solid var(--border-strong);border-radius:var(--radius);
+    padding:18px;overflow-x:auto;margin:16px 0}
+  .blueprint .cap{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--blueprint-ink);opacity:.7;margin-bottom:10px}
+  pre.mermaid{background:transparent;margin:0;min-width:640px}
+
+  /* flow diagram */
+  .flow{display:flex;flex-direction:column;gap:10px;margin:18px 0}
+  .flowrow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}
+  .node{flex:1;min-width:150px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px 14px;box-shadow:var(--shadow)}
+  .node .nt{font-weight:600;font-size:13.5px;color:var(--ink)}
+  .node .nd{font-size:12px;color:var(--ink-3);margin-top:2px}
+  .node.hl{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+  .down{text-align:center;color:var(--ink-3);font-size:18px;line-height:1}
+
+  footer{border-top:1px solid var(--border);margin-top:80px;padding-top:24px;color:var(--ink-3);font-size:13px}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--border);flex-direction:row;
+      flex-wrap:wrap;align-items:center;gap:8px;overflow:visible}
+    .side .nav{display:none}
+    .brand{margin:0}
+    .themebtn{margin:0}
+    #relpanel{left:12px;right:12px;width:auto}
+  }
+  @media print{.side,#relpanel,.toolbar{display:none}}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <span class="mark">TMS · RDBMS</span>
+      <span class="name">Database Blueprint</span>
+      <span class="sub">PostgreSQL 16 · 100K→1M devices</span>
+    </div>
+    <nav class="nav">
+      <a href="#overview" class="active">Overview &amp; verdict</a>
+      <a href="#architecture">System architecture</a>
+      <a href="#capacity">Capacity &amp; scale</a>
+      <div class="grouplabel">Data model</div>
+      <a href="#schemas">Schema strategy</a>
+      <a href="#map">Core relational map</a>
+      <a href="#explorer-s">Schema explorer</a>
+      <div class="grouplabel">Deep dives</div>
+      <a href="#transactions">Transactions &amp; partitioning</a>
+      <a href="#idempotency">Idempotency &amp; concurrency</a>
+      <a href="#logging">Logging &amp; retention</a>
+      <a href="#recon">Reconciliation &amp; settlement</a>
+      <div class="grouplabel">Operate</div>
+      <a href="#roadmap">Scaling roadmap</a>
+      <a href="#ha">HA · DR · connections</a>
+      <a href="#appendix">SQL &amp; queries</a>
+    </nav>
+    <button class="themebtn" id="themebtn" aria-label="Toggle theme">
+      <span id="themeicon">◐</span><span id="themelabel">Theme</span>
+    </button>
+  </aside>
+
+  <main>
+    <!-- ===================== OVERVIEW ===================== -->
+    <section id="overview" class="hero">
+      <div class="eyebrow">Principal architecture reference</div>
+      <h1>A relational system of record for a high-volume Transaction Management System.</h1>
+      <p class="lead">PostgreSQL 16 as the single source of truth for organizations, devices, transactions, payments, reconciliation and settlement — engineered for <b>100,000+ IoT devices</b> and <b>3.5M+ transactions/day</b>, and designed to grow to 1M devices without a schema rewrite.</p>
+
+      <div class="kmeta">
+        <span class="chip"><b>3.5M</b> txns / day</span>
+        <span class="chip"><b>~41</b> avg TPS</span>
+        <span class="chip"><b>~405</b> peak TPS (10×)</span>
+        <span class="chip"><b>1.28B</b> txns / year</span>
+        <span class="chip"><b>46</b> tables · 12 schemas</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="n accent">Aurora</div><div class="l">PostgreSQL, Multi-AZ writer + 2 readers</div></div>
+        <div class="stat"><div class="n">Native</div><div class="l">Range partitioning by month on hot tables</div></div>
+        <div class="stat"><div class="n">RDS Proxy</div><div class="l">+ PgBouncer for Lambda/worker fan-in</div></div>
+        <div class="stat"><div class="n">SQS</div><div class="l">Buffered, batched writes — never Lambda→DB direct</div></div>
+      </div>
+
+      <div class="callout good">
+        <div class="k">The one-paragraph verdict</div>
+        <p style="margin:2px 0">Run <b>Amazon Aurora PostgreSQL</b> (writer + read replicas, Multi-AZ) as the system of record. Keep everything relational under <b>logical schemas</b> in one cluster. Make the <code>transactions</code>, <code>transaction_status_history</code>, <code>audit_logs</code>, <code>device_logs</code> and <code>api_request_logs</code> tables <b>native range-partitioned by month</b>. Absorb ingestion spikes through <b>IoT Core → Lambda → SQS → batching workers</b> behind <b>RDS Proxy</b>. Serve current device status from a small <code>device_current_state</code> table + <b>Redis</b>; serve the dashboard from <b>pre-aggregated summary tables</b>, never live scans of the billion-row history. Introduce TimescaleDB only for time-series aggregates, and sharding only past ~1M devices.</p>
+      </div>
+    </section>
+
+    <!-- ===================== ARCHITECTURE ===================== -->
+    <section id="architecture">
+      <div class="eyebrow">§1 · End to end</div>
+      <h2 class="title">System architecture</h2>
+      <p class="lead">Every device message is decoupled from the database by a queue. Nothing writes to PostgreSQL synchronously from the device path, so a 10× spike becomes queue depth — not a connection storm.</p>
+
+      <div class="flow">
+        <div class="flowrow">
+          <div class="node"><div class="nt">100,000+ IoT devices</div><div class="nd">MQTT over TLS, X.509 per-device certs</div></div>
+          <div class="node"><div class="nt">AWS IoT Core</div><div class="nd">Broker, device shadows, rules engine</div></div>
+        </div>
+        <div class="down">↓</div>
+        <div class="flowrow">
+          <div class="node"><div class="nt">IoT Rule → Lambda</div><div class="nd">Validate, stamp <code>correlation_id</code>, enqueue</div></div>
+          <div class="node hl"><div class="nt">Amazon SQS</div><div class="nd">Ingestion buffer + retry/DLQ. Absorbs spikes</div></div>
+        </div>
+        <div class="down">↓</div>
+        <div class="flowrow">
+          <div class="node hl"><div class="nt">Transaction workers</div><div class="nd">ECS/Fargate consumers, batched idempotent writes</div></div>
+          <div class="node"><div class="nt">RDS Proxy / PgBouncer</div><div class="nd">Pooling — thousands of workers, ~hundreds of DB conns</div></div>
+        </div>
+        <div class="down">↓</div>
+        <div class="flowrow">
+          <div class="node hl"><div class="nt">Aurora PostgreSQL 16</div><div class="nd">System of record · writer + read replicas</div></div>
+          <div class="node"><div class="nt">Redis (ElastiCache)</div><div class="nd">Device state cache, counters, rate limits, locks</div></div>
+          <div class="node"><div class="nt">Amazon S3</div><div class="nd">Receipts, recon files, archived partitions, exports</div></div>
+        </div>
+        <div class="down">↓</div>
+        <div class="flowrow">
+          <div class="node"><div class="nt">ASP.NET Core APIs</div><div class="nd">.NET 10 · reads from replicas + Redis</div></div>
+          <div class="node"><div class="nt">React + TypeScript</div><div class="nd">Dashboard reads pre-aggregated summaries</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Why a queue sits between Lambda and PostgreSQL</h4>
+          <p>Direct <b>Lambda → PostgreSQL</b> is an anti-pattern at this scale: a spike to thousands of concurrent Lambda invocations would each try to open a connection, exhausting the database. SQS turns a spike into backlog the workers drain at a controlled rate. Workers run at bounded concurrency, so peak DB connections stay flat regardless of device traffic.</p>
+        </div>
+        <div class="card">
+          <h4>What stays out of PostgreSQL</h4>
+          <p>Raw MQTT frames, debug traces and per-request API logs go to <b>CloudWatch / OpenTelemetry</b> and <b>S3</b>, not the transactional store. PostgreSQL holds <b>business truth</b>: transactions, payments, state changes, audit and reconciliation. This keeps the hot tables lean and the working set in RAM.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CAPACITY ===================== -->
+    <section id="capacity">
+      <div class="eyebrow">§2 · The math</div>
+      <h2 class="title">Capacity &amp; scale planning</h2>
+      <p class="lead">Assumptions: 35 transactions/device/day; peak = 10× the 24-hour average; ~4 status-history rows and ~0.3 failure rows per transaction; lean transaction row ≈ 0.6&nbsp;KB heap (+ ~50% indexes), history row ≈ 0.15&nbsp;KB. Design targets the <b>peak</b>, not the average.</p>
+
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr>
+            <th>Devices</th><th>Txns/day</th><th>Txns/month</th><th>Txns/year</th>
+            <th>Avg TPS</th><th>Peak TPS</th><th>Txn table/yr</th><th>+Indexes/yr</th><th>Status hist/yr</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><b>100,000</b></td><td class="num">3.5M</td><td class="num">105M</td><td class="num">1.28B</td><td class="num">41</td><td class="num">405</td><td class="num">~0.77 TB</td><td class="num">~0.38 TB</td><td class="num">~0.77 TB</td></tr>
+            <tr><td><b>250,000</b></td><td class="num">8.75M</td><td class="num">263M</td><td class="num">3.19B</td><td class="num">101</td><td class="num">1,013</td><td class="num">~1.9 TB</td><td class="num">~0.96 TB</td><td class="num">~1.9 TB</td></tr>
+            <tr><td><b>500,000</b></td><td class="num">17.5M</td><td class="num">525M</td><td class="num">6.39B</td><td class="num">203</td><td class="num">2,025</td><td class="num">~3.8 TB</td><td class="num">~1.9 TB</td><td class="num">~3.8 TB</td></tr>
+            <tr><td><b>1,000,000</b></td><td class="num">35M</td><td class="num">1.05B</td><td class="num">12.78B</td><td class="num">405</td><td class="num">4,051</td><td class="num">~7.7 TB</td><td class="num">~3.8 TB</td><td class="num">~7.7 TB</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;color:var(--ink-3)">TB figures are per <b>year of retained hot data</b>. Once older partitions roll to S3 (Parquet), the online cluster footprint stays a small multiple of the hot window — you never keep all years online. Debug/MQTT logs are excluded (they live in CloudWatch/S3, roughly 5–20× the transaction volume in raw bytes but never in Postgres).</p>
+
+      <div class="callout">
+        <div class="k">Reading the peak</div>
+        <p style="margin:2px 0">At 100K devices, 405 sustained peak TPS of small, idempotent inserts is comfortable for a single Aurora writer with batching — the risk is never raw TPS, it's <b>connection count</b> and <b>unpartitioned table bloat</b>. Both are solved structurally below, so the same design carries to 1M devices by scaling instance size, readers and partition cadence — not by redesigning.</p>
+      </div>
+    </section>
+
+    <!-- ===================== SCHEMAS ===================== -->
+    <section id="schemas">
+      <div class="eyebrow">§3 · Organization</div>
+      <h2 class="title">Logical schema strategy</h2>
+      <p class="lead">One physical cluster, <b>twelve logical schemas</b>. This is recommended: schemas give namespacing, per-domain <code>GRANT</code>s and clear ownership boundaries <em>without</em> the cross-database join pain, distributed-transaction risk and connection multiplication of physically separate databases.</p>
+
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Schema</th><th>Owns</th><th>Notable tables</th></tr></thead>
+          <tbody>
+            <tr><td><b class="mono">core</b></td><td>Tenancy, identity, RBAC</td><td class="mono">organizations, users, roles, permissions</td></tr>
+            <tr><td><b class="mono">device</b></td><td>Fleet, config, live state</td><td class="mono">devices, device_current_state, device_logs</td></tr>
+            <tr><td><b class="mono">transaction</b></td><td>The financial ledger</td><td class="mono">transactions, transaction_status_history</td></tr>
+            <tr><td><b class="mono">payment</b></td><td>Provider-side payment detail</td><td class="mono">payments, payment_providers, payment_attempts</td></tr>
+            <tr><td><b class="mono">reconciliation</b></td><td>Provider vs TMS matching</td><td class="mono">reconciliation_batches, _records, _exceptions</td></tr>
+            <tr><td><b class="mono">settlement</b></td><td>Money movement batches</td><td class="mono">settlement_batches, settlement_records</td></tr>
+            <tr><td><b class="mono">configuration</b></td><td>Business config &amp; feature flags</td><td class="mono">business_configuration</td></tr>
+            <tr><td><b class="mono">notification</b></td><td>Outbound message log</td><td class="mono">notification_logs</td></tr>
+            <tr><td><b class="mono">alert</b></td><td>Rule-driven operational alerts</td><td class="mono">alert_rules, alerts, alert_history</td></tr>
+            <tr><td><b class="mono">audit</b></td><td>Append-only security/business trail</td><td class="mono">audit_logs</td></tr>
+            <tr><td><b class="mono">logging</b></td><td>Optional DB-side request log</td><td class="mono">api_request_logs</td></tr>
+            <tr><td><b class="mono">reporting</b></td><td>Pre-aggregated dashboard data</td><td class="mono">txn_daily_stats, device_txn_daily</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid2">
+        <div class="card"><h4>Benefit</h4><p>Least-privilege DB roles per domain (a reporting role can't touch <code>payment</code>); tidy migrations; clear code ownership; and you can still <code>JOIN</code> freely across schemas in one transaction.</p></div>
+        <div class="card"><h4>Drawback (managed)</h4><p>Search-path discipline and more qualified names. Avoid over-splitting — we do <em>not</em> make a schema per micro-feature. Twelve stable domains is the ceiling.</p></div>
+      </div>
+    </section>
+
+    <!-- ===================== CORE MAP ===================== -->
+    <section id="map">
+      <div class="eyebrow">§4 · The spine</div>
+      <h2 class="title">Core relational map</h2>
+      <p class="lead">The central integrity spine: a tenant owns devices and users; a device raises transactions; a transaction has one payment, many status changes, and flows into reconciliation and settlement. The full 50-table detail is in the explorer below.</p>
+
+      <div class="blueprint">
+        <div class="cap">core.transaction integrity spine — Mermaid ER</div>
+<pre class="mermaid">
+%%{init: {'theme':'base','themeVariables':{'background':'transparent','primaryColor':'#0e2f39','primaryBorderColor':'#3d8f97','primaryTextColor':'#dbeef1','lineColor':'#5aa9b0','fontFamily':'IBM Plex Mono'}}}%%
+erDiagram
+  organizations ||--o{ users_link : "has"
+  organizations ||--o{ devices : "owns"
+  organizations ||--o{ transactions : "scopes"
+  devices ||--o| device_current_state : "1:1 live"
+  devices ||--o{ device_logs : "emits"
+  devices ||--o{ transactions : "raises"
+  device_types ||--o{ devices : "classifies"
+  transactions ||--o{ transaction_status_history : "state trail"
+  transactions ||--o{ transaction_failures : "may fail"
+  transactions ||--|| payments : "settled by"
+  payment_providers ||--o{ payments : "processes"
+  payments ||--o{ payment_attempts : "retries"
+  transactions ||--o{ reconciliation_records : "reconciled"
+  reconciliation_batches ||--o{ reconciliation_records : "groups"
+  reconciliation_records ||--o{ reconciliation_exceptions : "flags"
+  settlement_batches ||--o{ settlement_records : "groups"
+  transactions ||--o{ settlement_records : "settled in"
+  organizations ||--o{ audit_logs : "audited"
+  organizations ||--o{ alerts : "raises"
+
+  organizations { uuid organization_id PK }
+  users_link { uuid user_id PK }
+  devices { uuid device_id PK }
+  device_types { int device_type_id PK }
+  device_current_state { uuid device_id PK }
+  device_logs { bigint log_id PK }
+  transactions { uuid transaction_id PK }
+  transaction_status_history { bigint id PK }
+  transaction_failures { bigint failure_id PK }
+  payments { uuid payment_id PK }
+  payment_providers { int provider_id PK }
+  payment_attempts { bigint attempt_id PK }
+  reconciliation_batches { uuid batch_id PK }
+  reconciliation_records { bigint recon_record_id PK }
+  reconciliation_exceptions { bigint exception_id PK }
+  settlement_batches { uuid settlement_batch_id PK }
+  settlement_records { bigint settlement_record_id PK }
+  audit_logs { bigint audit_id PK }
+  alerts { bigint alert_id PK }
+</pre>
+      </div>
+    </section>
+
+    <!-- ===================== EXPLORER ===================== -->
+    <section id="explorer-s">
+      <div class="eyebrow">§5 · Every table, every column</div>
+      <h2 class="title">Interactive schema explorer</h2>
+      <p class="lead">All 46 tables with full columns and types. <b>Click a table header</b> to spotlight it and everything it relates to; click a <span class="fkchip" style="cursor:default">→ fk</span> chip to jump to the referenced table. Search matches table and column names.</p>
+
+      <div class="legend" id="legend"></div>
+
+      <div class="toolbar">
+        <label class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="search" type="text" placeholder="Search tables and columns…  (e.g. idempotency, correlation_id, device_id)">
+        </label>
+        <button class="btn" id="clearsel">Clear highlight</button>
+        <span class="count" id="count"></span>
+      </div>
+
+      <div id="explorer"></div>
+    </section>
+
+    <!-- ===================== TRANSACTIONS ===================== -->
+    <section id="transactions">
+      <div class="eyebrow">§6 · The critical table</div>
+      <h2 class="title">Transactions &amp; partitioning</h2>
+      <p class="lead">The transaction table reaches 1.28B rows/year at 100K devices. It must never be one flat heap. <b>Chosen: native PostgreSQL range partitioning by month on <code>created_at</code></b> — with TimescaleDB reserved for the reporting aggregates only.</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>A · Native range partitioning ✓ chosen</h4>
+          <p>Monthly partitions <code>transactions_2026_01…</code>. Partition pruning turns every date-bounded query into a scan of one or two partitions. Old months detach and archive to S3 as immutable units. Full DDL/constraint control — critical for a financial ledger.</p>
+        </div>
+        <div class="card">
+          <h4>B · TimescaleDB hypertable</h4>
+          <p>Excellent ergonomics and compression for <em>append-only telemetry</em>, but its value is time-series aggregation, not a mutable ledger with rich FKs and update-heavy status flows. We use it for <b>continuous aggregates</b> feeding the dashboard — not for the ledger itself.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="k">C · Hybrid — what we actually ship</div>
+        <p style="margin:2px 0"><b>Ledger tables</b> (<code>transactions</code>, <code>transaction_status_history</code>) → native monthly partitions. <b>Dashboard rollups</b> → TimescaleDB continuous aggregates (or plain summary tables if you skip Timescale). This keeps financial integrity native and hands the heavy read-aggregation to purpose-built machinery.</p>
+      </div>
+
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Decision</th><th>Choice</th><th>Rationale</th></tr></thead>
+          <tbody>
+            <tr><td><b>Partition key</b></td><td class="mono">created_at (timestamptz, UTC)</td><td>Insert-time monotonic; matches every dashboard/date query for pruning</td></tr>
+            <tr><td><b>Interval</b></td><td class="mono">1 month</td><td>~105M rows/partition at 100K devices — healthy size; weekly if you exceed ~250K devices</td></tr>
+            <tr><td><b>Primary key</b></td><td class="mono">(transaction_id, created_at)</td><td>Partition key must be in the PK; app treats <code>transaction_id</code> as the id</td></tr>
+            <tr><td><b>Indexes</b></td><td class="mono">per-partition composites + BRIN</td><td>See §7 — narrow B-trees on lookup paths, BRIN on <code>created_at</code></td></tr>
+            <tr><td><b>Maintenance</b></td><td class="mono">pg_partman</td><td>Auto pre-creates future partitions + detaches old ones on schedule</td></tr>
+            <tr><td><b>Retention</b></td><td class="mono">hot 13–24 mo online</td><td>Financial rows never deleted — detached &amp; archived to S3, restorable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Indexing — pay only where you query</h3>
+      <p>Every index is a write tax on the hottest table in the system. We index the proven access paths and nothing else.</p>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Index</th><th>Type</th><th>Serves</th><th>Write cost</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">(organization_id, created_at DESC)</td><td>B-tree</td><td>Tenant transaction lists, dashboards</td><td>Moderate</td></tr>
+            <tr><td class="mono">(device_id, created_at DESC)</td><td>B-tree</td><td>Per-device history &amp; latest txn</td><td>Moderate</td></tr>
+            <tr><td class="mono">(status, created_at DESC)</td><td>B-tree</td><td>Pending/failed sweeps</td><td>Moderate</td></tr>
+            <tr><td class="mono">(org_id, idempotency_key, created_at)</td><td>Unique</td><td>Idempotency guarantee</td><td>High — but mandatory</td></tr>
+            <tr><td class="mono">(provider_transaction_id)</td><td>B-tree, partial WHERE NOT NULL</td><td>Reconciliation lookup</td><td>Low (sparse)</td></tr>
+            <tr><td class="mono">created_at</td><td>BRIN</td><td>Wide range scans, archival</td><td>Negligible</td></tr>
+            <tr><td class="mono">(status) WHERE status IN pending/retry</td><td>Partial B-tree</td><td>Worker retry queue</td><td>Very low (tiny)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== IDEMPOTENCY ===================== -->
+    <section id="idempotency">
+      <div class="eyebrow">§7 · Exactly once, on top of at-least-once</div>
+      <h2 class="title">Idempotency &amp; concurrency</h2>
+      <p class="lead">MQTT, Lambda, SQS and provider retries all deliver the same transaction 2–10 times. The database — not application memory — is the arbiter of "one transaction."</p>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>The guarantee</h4>
+          <p>The device stamps a stable <code>idempotency_key</code> (or <code>device_transaction_id</code>) per logical transaction. The table carries <b>UNIQUE (organization_id, idempotency_key, created_at)</b>. Workers use <code>INSERT … ON CONFLICT DO NOTHING RETURNING</code>:</p>
+          <ul>
+            <li>First delivery → row inserted, returned, processed.</li>
+            <li>Duplicates → conflict, no row returned, ack &amp; drop.</li>
+          </ul>
+          <p>Result: N deliveries, exactly one row — enforced at the storage layer, immune to worker races.</p>
+        </div>
+        <div class="card">
+          <h4>The uniqueness ladder</h4>
+          <ul>
+            <li><code>idempotency_key</code> — <b>primary</b> dedup, scoped per tenant.</li>
+            <li><code>device_transaction_id</code> — unique per device (partial unique where not null).</li>
+            <li><code>provider_transaction_id</code> — unique per provider on <code>payments</code>, catches provider-side dupes.</li>
+            <li><code>transaction_reference</code> — human/business reference, indexed, not necessarily unique.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout warn">
+        <div class="k">Concurrency without lock abuse</div>
+        <p style="margin:2px 0">Status transitions use <b>optimistic concurrency</b> (a <code>version</code> column / <code>WHERE status = expected</code>) so two workers can't both move a row out of <code>PROCESSING</code>. Row locks (<code>SELECT … FOR UPDATE</code>) only where a genuine read-modify-write is unavoidable. <b>Advisory locks</b> only for singleton jobs (e.g. one recon batch per provider/day). No table locks, ever. The <code>transaction_status_history</code> table is append-only — transitions are inserts, never updates.</p>
+      </div>
+    </section>
+
+    <!-- ===================== LOGGING ===================== -->
+    <section id="logging">
+      <div class="eyebrow">§8 · Right log, right store</div>
+      <h2 class="title">Logging &amp; retention</h2>
+      <p class="lead">The biggest scaling mistake is dumping every log into the transactional database. We split logs by <em>purpose</em> and send each to the store that fits.</p>
+
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Log kind</th><th>Example</th><th>Store</th><th>Retention</th></tr></thead>
+          <tbody>
+            <tr><td><b>Business events</b></td><td>Txn lifecycle, payment, settlement, config change</td><td>PostgreSQL <span class="mono">(*_status_history, audit_logs)</span></td><td>Long / compliance</td></tr>
+            <tr><td><b>Operational device events</b></td><td>Connected, firmware update, config failure, auth failure</td><td>PostgreSQL <span class="mono">device_logs</span> (partitioned)</td><td>90–180 days</td></tr>
+            <tr><td><b>Raw MQTT / shadow frames</b></td><td>Every heartbeat, every low-level message</td><td>CloudWatch → S3</td><td>7–30 days</td></tr>
+            <tr><td><b>Application logs</b></td><td>ASP.NET structured logs, stack traces</td><td>CloudWatch / OpenTelemetry</td><td>14–30 days</td></tr>
+            <tr><td><b>Debug/trace</b></td><td>Verbose diagnostic spans</td><td>CloudWatch / S3, sampled</td><td>3–7 days</td></tr>
+            <tr><td><b>API request logs</b></td><td>method/path/status/latency</td><td>OTel default; DB <span class="mono">api_request_logs</span> only if compliance requires</td><td>7–30 days, sampled</td></tr>
+            <tr><td><b>Audit trail</b></td><td>Refund, reversal, role change, manual action</td><td>PostgreSQL <span class="mono">audit_logs</span> (partitioned, append-only)</td><td>Long / 7 yr</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid2">
+        <div class="card"><h4>Correlation everywhere it earns its place</h4><p>A single <code>correlation_id</code> (plus <code>request_id</code>, <code>trace_id</code>) is stamped at ingestion and threaded device → IoT → Lambda → SQS → worker → txn → provider. It's stored on <code>transactions</code>, <code>*_status_history</code>, <code>*_failures</code>, <code>device_logs</code>, <code>audit_logs</code>, <code>notification_logs</code>, <code>alerts</code>. It's <em>not</em> stored on static lookup tables — no value there.</p></div>
+        <div class="card"><h4>Never in any log</h4><p>Passwords, tokens, <code>Authorization</code> headers, full PANs, CVV, raw payment credentials. <code>payment_provider_responses</code> stores sanitized bodies with short retention. PII is minimized and column-encrypted where present.</p></div>
+      </div>
+
+      <h3>Who created / updated a row</h3>
+      <p>Attribution answers a different question than the timestamps: <code>created_at</code>/<code>updated_at</code> say <em>when</em>; these say <em>who</em>. Three kinds of actor are identified three ways.</p>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Actor</th><th>Example</th><th>Identified by</th></tr></thead>
+          <tbody>
+            <tr><td><b>Human user</b></td><td>Admin edits config, issues a refund</td><td class="mono">created_by / updated_by → core.users, + audit_logs.user_id</td></tr>
+            <tr><td><b>Device</b></td><td>POS raises a transaction</td><td class="mono">device_id + provider + source (no human)</td></tr>
+            <tr><td><b>System / worker</b></td><td>Status auto-advances, recon job</td><td class="mono">source + correlation_id (traces the pipeline)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h4>Layer 1 — attribution columns (the "current" answer)</h4>
+          <p>Every human-editable table (14 of them — orgs, users, roles, devices, providers, config, alert rules, settlement &amp; recon batches…) carries nullable <code>created_by</code> and <code>updated_by</code> → <code>core.users</code>. Null means a machine did it. A <code>stamp_row()</code> BEFORE trigger fills them from a per-request session variable, so application code <em>cannot forget</em> to set them.</p>
+        </div>
+        <div class="card">
+          <h4>Layer 2 — audit_logs (the "history" answer)</h4>
+          <p>Row columns only hold the <em>latest</em> editor. The append-only, partitioned <code>audit.audit_logs</code> keeps every change — <code>action</code>, <code>old_value → new_value</code>, <code>user_id</code>, IP, <code>correlation_id</code> — written by a generic <code>audit.log_change()</code> AFTER trigger. Earliest <code>INSERT</code> = creator; each <code>UPDATE</code> = an editor. <code>entity_id</code> is <code>text</code> so it holds both uuid and integer keys.</p>
+        </div>
+      </div>
+      <div class="callout good">
+        <div class="k">The contract</div>
+        <p style="margin:2px 0">The app sets <code>SET app.current_user='&lt;uuid&gt;'</code> (and <code>app.correlation_id</code>) once per request — alongside the <code>app.current_org</code> that RLS already uses. From then on attribution and the audit trail are stamped in the database by trigger, not by hand. Device-driven tables (<code>transactions</code>, <code>payments</code>, <code>*_logs</code>) are intentionally excluded — their "who" is the device + trace id, read from <code>transaction_status_history</code>, not <code>created_by</code>.</p>
+      </div>
+
+      <h3>Retention matrix</h3>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Data class</th><th>Online (Postgres)</th><th>Archive (S3/Glacier)</th><th>Delete?</th></tr></thead>
+          <tbody>
+            <tr><td>Financial transactions</td><td>13–24 months</td><td>7+ years</td><td><b>Never auto-delete</b></td></tr>
+            <tr><td>Transaction status history</td><td>13–24 months</td><td>7+ years</td><td>Compliance-driven</td></tr>
+            <tr><td>Audit logs</td><td>12–24 months</td><td>7 years</td><td>No</td></tr>
+            <tr><td>Aggregated / reporting</td><td>Indefinite (small)</td><td>—</td><td>No</td></tr>
+            <tr><td>Device operational logs</td><td>90–180 days</td><td>Optional</td><td>Yes, after window</td></tr>
+            <tr><td>API request logs</td><td>7–30 days</td><td>Optional</td><td>Yes</td></tr>
+            <tr><td>Debug / raw MQTT</td><td>Not stored</td><td>3–30 days</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== RECON ===================== -->
+    <section id="recon">
+      <div class="eyebrow">§9 · Trust but verify</div>
+      <h2 class="title">Reconciliation, settlement &amp; the dashboard</h2>
+      <div class="grid2">
+        <div class="card">
+          <h4>Reconciliation</h4>
+          <p>Provider files land in S3, ingest into <code>reconciliation_batches</code> → <code>reconciliation_records</code>, each carrying a <code>match_status</code>: <span class="mono">MATCHED, MISMATCHED, MISSING_IN_TMS, MISSING_IN_PROVIDER, AMOUNT_MISMATCH, DUPLICATE, PENDING</span>. Anything non-matched spawns a <code>reconciliation_exception</code>. Every record traces back to transaction → device → org → provider → settlement.</p>
+        </div>
+        <div class="card">
+          <h4>Settlement</h4>
+          <p><code>settlement_batches</code> group <code>settlement_records</code> that reference transactions and hold settlement-specific amounts (gross/fee/net) — <b>without duplicating</b> the ledger's authoritative financial fields. <code>ON DELETE RESTRICT</code> guarantees a settled transaction can never be deleted out from under a batch.</p>
+        </div>
+      </div>
+
+      <h3>Dashboard — never scan a billion rows on page load</h3>
+      <p>The three-tier read model keeps the UI instant:</p>
+      <div class="flow">
+        <div class="flowrow">
+          <div class="node"><div class="nt">Raw transactions</div><div class="nd">Partitioned ledger, billions of rows</div></div>
+          <div class="node hl"><div class="nt">Aggregation layer</div><div class="nd">Summary tables + TimescaleDB continuous aggregates, refreshed on schedule</div></div>
+          <div class="node hl"><div class="nt">Redis</div><div class="nd">Live counters &amp; "today so far", sub-ms</div></div>
+        </div>
+      </div>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Metric</th><th>Served from</th></tr></thead>
+          <tbody>
+            <tr><td>Today's live txn count / amount, success-so-far</td><td>Redis counters (incremented by workers)</td></tr>
+            <tr><td>Hourly &amp; daily counts, success/failure rate, provider stats</td><td><span class="mono">reporting.txn_daily_stats</span> / continuous aggregate</td></tr>
+            <tr><td>Total &amp; online/offline device counts</td><td><span class="mono">device_current_state</span> + Redis</td></tr>
+            <tr><td>Historical drill-down (a specific day/device)</td><td>Partition-pruned query on the ledger</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ROADMAP ===================== -->
+    <section id="roadmap">
+      <div class="eyebrow">§10 · When to add what</div>
+      <h2 class="title">Scaling roadmap</h2>
+      <p class="lead">Everything below is in the design from day one <em>except</em> sharding. The point is thresholds — never introduce complexity before the number demands it.</p>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Stage</th><th>Devices</th><th>Introduce</th><th>Why now</th></tr></thead>
+          <tbody>
+            <tr><td><b>1</b></td><td>100K</td><td>Partitioning, RDS Proxy, Redis, SQS, 1 read replica, summary tables</td><td>Baseline — all structural, cheap to run</td></tr>
+            <tr><td><b>2</b></td><td>250K</td><td>2nd/3rd read replica, PgBouncer tuning, weekly partitions, TimescaleDB aggregates</td><td>Read load and partition size climb</td></tr>
+            <tr><td><b>3</b></td><td>500K</td><td>Separate reporting replica, S3 archival of cold partitions, larger writer</td><td>Analytics must stop competing with OLTP</td></tr>
+            <tr><td><b>4</b></td><td>1M+</td><td>Aurora scale-up / limitless, dedicated data warehouse (Redshift), <em>then</em> consider tenant sharding</td><td>Single-writer ceiling &amp; multi-TB hot set</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout warn"><div class="k">Do not shard early</div><p style="margin:2px 0">Sharding multiplies operational cost and breaks cross-tenant queries. A well-partitioned Aurora writer with read replicas comfortably serves 1M devices. Reach for sharding only when a single writer's <b>write</b> throughput is the proven bottleneck — and shard by <code>organization_id</code> so each tenant stays whole.</p></div>
+    </section>
+
+    <!-- ===================== HA ===================== -->
+    <section id="ha">
+      <div class="eyebrow">§11 · Keep it up, get it back</div>
+      <h2 class="title">HA · DR · connections · security</h2>
+
+      <h3>Deployment: RDS vs Aurora vs self-managed</h3>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Option</th><th>Strengths</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>RDS PostgreSQL</td><td>Simple, cheaper, standard PG</td><td>Fine to start; single-writer, slower replica failover</td></tr>
+            <tr><td><b>Aurora PostgreSQL</b></td><td>Fast failover, up to 15 low-lag readers, storage auto-scales to 128&nbsp;TB, RDS Proxy, backtrack</td><td><b>✓ Recommended</b> — read scaling + resilience at this volume</td></tr>
+            <tr><td>Self-managed EC2</td><td>Full control, TimescaleDB/extensions freedom</td><td>Only if you need extensions Aurora lacks; heavy ops burden</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Connection management</h4>
+          <p>100K devices ≠ 100K DB connections. Devices hold MQTT sessions, not DB sessions. Fan-in collapses through <b>RDS Proxy</b> (+ PgBouncer transaction pooling), so a few hundred pooled connections back thousands of workers. Lambdas <em>never</em> hold DB connections directly — they enqueue to SQS. Worker concurrency is bounded, so peak DB connections are predictable.</p>
+        </div>
+        <div class="card">
+          <h4>Backup &amp; DR targets</h4>
+          <ul>
+            <li>Continuous WAL + automated snapshots, <b>PITR</b> to any second in the window.</li>
+            <li>Cross-region replica / snapshot copy for regional DR.</li>
+            <li><b>RPO ≤ 1 min</b> (continuous WAL), <b>RTO ≤ 15 min</b> (Aurora failover / promote).</li>
+            <li>Quarterly restore drills — an untested backup is a hope, not a plan.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4>Multi-tenancy &amp; isolation</h4>
+          <p>Every tenant-owned row carries <code>organization_id</code>. Enforce isolation at <b>both</b> layers: the API always filters by tenant (fast path), and PostgreSQL <b>Row-Level Security</b> is the backstop — a policy on <code>organization_id</code> vs a session <code>SET app.current_org</code> so a bug can't leak cross-tenant data. Belt and braces: RLS is the guarantee, the API filter is the performance path.</p>
+        </div>
+        <div class="card">
+          <h4>Integrity &amp; security</h4>
+          <ul>
+            <li>PK/FK/UNIQUE/CHECK/NOT NULL throughout; money is <code>numeric(18,4)</code>, never float; timestamps <code>timestamptz</code> in UTC.</li>
+            <li><b>ON DELETE RESTRICT</b> from transactions to device/user — a financial row never disappears because a device was deleted. Soft-delete via <code>deleted_at</code>.</li>
+            <li>Encryption at rest (KMS) &amp; in transit (TLS); secrets in Secrets Manager; per-schema least-privilege roles.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== APPENDIX ===================== -->
+    <section id="appendix">
+      <div class="eyebrow">§12 · Build it</div>
+      <h2 class="title">SQL &amp; production queries</h2>
+      <p class="lead">Executable DDL, seed/sample data and the tuned query library ship alongside this page as three SQL files:</p>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>File</th><th>Contents</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">schema.sql</td><td>Extensions, 12 schemas, enums, all tables, partitions (pg_partman), constraints, indexes, functions, triggers, views, materialized views, retention</td></tr>
+            <tr><td class="mono">seed_and_sample.sql</td><td>Lookup seeds (device/txn/status/provider/failure-code/role/permission) + realistic sample orgs, devices, transactions, payments, recon &amp; settlement</td></tr>
+            <tr><td class="mono">queries.sql</td><td>Tuned device / transaction / dashboard / reconciliation queries with partition pruning &amp; index hints</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Representative production queries</h3>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Need</th><th>Shape</th></tr></thead>
+          <tbody>
+            <tr><td>Device by AWS Thing Name</td><td class="mono">WHERE aws_thing_name = $1  — unique index, O(1)</td></tr>
+            <tr><td>Offline devices for org</td><td class="mono">device_current_state WHERE connection_status='OFFLINE' AND organization_id=$1</td></tr>
+            <tr><td>Latest txn per device</td><td class="mono">DISTINCT ON (device_id) … ORDER BY device_id, created_at DESC</td></tr>
+            <tr><td>Failed txns, last 24h, org</td><td class="mono">WHERE organization_id=$1 AND status='FAILED' AND created_at &gt;= now()-'24h'  — prunes to 1 partition</td></tr>
+            <tr><td>Success rate today</td><td class="mono">SELECT … FROM reporting.txn_daily_stats WHERE business_date=current_date</td></tr>
+            <tr><td>Unmatched reconciliation</td><td class="mono">reconciliation_records WHERE match_status &lt;&gt; 'MATCHED'</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout good">
+        <div class="k">Final design review — passed</div>
+        <p style="margin:2px 0"><b>Scalability:</b> partitioned billion-row tables, queue-buffered writes, pooled connections. <b>Integrity:</b> FKs, unique idempotency, RESTRICT on financial rows, numeric money. <b>Performance:</b> targeted indexes, partition pruning, pre-aggregated dashboard. <b>Reliability:</b> DB-enforced idempotency, optimistic concurrency, retry/DLQ. <b>Logging:</b> business in PG, telemetry in CloudWatch/S3. <b>Security:</b> dual-layer RLS, KMS/TLS, least-privilege roles, no secrets in logs. <b>Ops:</b> PITR, cross-region DR, RPO≤1m/RTO≤15m, tested restores, retention + archival.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p><b>TMS Database Blueprint</b> · PostgreSQL 16 + Aurora · designed for 100K→1M devices and 3.5M+ transactions/day. Estimates carry the stated assumptions; validate row widths and index sizes against your real workload before capacity commitments.</p>
+    </footer>
+  </main>
+</div>
+
+<div id="relpanel">
+  <button class="close" id="relclose" aria-label="Close">✕</button>
+  <h4 id="reltitle"></h4>
+  <div id="relbody"></div>
+</div>
+
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({startOnLoad:true, securityLevel:'loose'});
+</script>
+
+<script>
+/* ---------- schema model ---------- */
+const SCHEMAS = {
+  core:{c:'#5b6cc9',d:'Tenancy, identity & RBAC'},
+  device:{c:'#1c9f95',d:'Fleet, config & live state'},
+  transaction:{c:'#2f74c0',d:'The financial ledger'},
+  payment:{c:'#8256c4',d:'Provider payment detail'},
+  reconciliation:{c:'#c08a2a',d:'Provider vs TMS matching'},
+  settlement:{c:'#2f9e6b',d:'Money movement batches'},
+  configuration:{c:'#6b7688',d:'Business config & flags'},
+  notification:{c:'#c05b8f',d:'Outbound message log'},
+  alert:{c:'#c0453b',d:'Rule-driven alerts'},
+  audit:{c:'#a06a3c',d:'Append-only trail'},
+  logging:{c:'#7a8494',d:'Optional API request log'},
+  reporting:{c:'#1e97b0',d:'Pre-aggregated dashboards'}
+};
+// k flags: pk, fk (needs ref), uk, part(itioned marker on table), agg
+const T = (schema,name,meta,cols)=>({schema,name,...meta,cols});
+const C = (n,t,keys,ref)=>({n,t,keys:keys||[],ref});
+const TABLES = [
+ /* core */
+ T('core','organizations',{note:'Root tenant. Self-referencing for hierarchies.',ret:'Long-term'},[
+   C('organization_id','uuid',['pk']),C('parent_organization_id','uuid',['fk'],'core.organizations'),
+   C('name','text',['nn']),C('slug','citext',['uk','nn']),C('status','text',['nn']),C('tier','text'),
+   C('country_code','char(2)'),C('timezone','text'),C('settings','jsonb'),
+   C('created_at','timestamptz',['nn']),C('updated_at','timestamptz',['nn']),C('deleted_at','timestamptz')]),
+ T('core','users',{note:'Global identity; tenant membership via organization_users.',ret:'Long-term'},[
+   C('user_id','uuid',['pk']),C('email','citext',['uk','nn']),C('full_name','text'),C('phone','text'),
+   C('password_hash','text'),C('status','text',['nn']),C('mfa_enabled','boolean'),
+   C('last_login_at','timestamptz'),C('created_at','timestamptz',['nn']),C('updated_at','timestamptz',['nn']),C('deleted_at','timestamptz')]),
+ T('core','roles',{note:'System or per-tenant roles.',ret:'Long-term'},[
+   C('role_id','integer',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),
+   C('name','text',['nn']),C('description','text'),C('is_system','boolean'),C('created_at','timestamptz',['nn'])]),
+ T('core','permissions',{note:'Fine-grained capability codes.',ret:'Long-term'},[
+   C('permission_id','integer',['pk']),C('code','text',['uk','nn']),C('description','text'),C('category','text')]),
+ T('core','role_permissions',{note:'Role ⇄ permission junction.',ret:'Long-term'},[
+   C('role_id','integer',['pk','fk'],'core.roles'),C('permission_id','integer',['pk','fk'],'core.permissions')]),
+ T('core','organization_users',{note:'Tenant membership.',ret:'Long-term'},[
+   C('organization_id','uuid',['pk','fk'],'core.organizations'),C('user_id','uuid',['pk','fk'],'core.users'),
+   C('status','text'),C('invited_at','timestamptz'),C('joined_at','timestamptz')]),
+ T('core','user_roles',{note:'Role grants, scoped per tenant.',ret:'Long-term'},[
+   C('user_id','uuid',['pk','fk'],'core.users'),C('role_id','integer',['pk','fk'],'core.roles'),
+   C('organization_id','uuid',['pk','fk'],'core.organizations'),C('granted_by','uuid',['fk'],'core.users'),C('granted_at','timestamptz')]),
+ /* device */
+ T('device','device_types',{note:'Device classification lookup.',ret:'Long-term'},[
+   C('device_type_id','integer',['pk']),C('code','text',['uk']),C('name','text'),C('category','text'),C('created_at','timestamptz')]),
+ T('device','device_models',{note:'Hardware models per type.',ret:'Long-term'},[
+   C('device_model_id','integer',['pk']),C('device_type_id','integer',['fk'],'device.device_types'),
+   C('manufacturer','text'),C('model_name','text'),C('model_code','text',['uk']),C('specs','jsonb')]),
+ T('device','devices',{note:'The fleet. UK(org, serial) + UK(aws_thing_name).',ret:'Long-term'},[
+   C('device_id','uuid',['pk']),C('organization_id','uuid',['fk','nn'],'core.organizations'),
+   C('device_type_id','integer',['fk'],'device.device_types'),C('device_model_id','integer',['fk'],'device.device_models'),
+   C('serial_number','text',['uk','nn']),C('display_name','text'),C('aws_thing_name','text',['uk']),
+   C('status','text',['fk','nn'],'device.device_status'),C('activated_at','timestamptz'),C('last_seen_at','timestamptz'),
+   C('created_at','timestamptz',['nn']),C('updated_at','timestamptz',['nn']),C('deleted_at','timestamptz')]),
+ T('device','device_identifiers',{note:'IMEI/SIM/ICCID/MAC, one row each. UK(type,value).',ret:'Long-term'},[
+   C('device_identifier_id','bigint',['pk']),C('device_id','uuid',['fk'],'device.devices'),
+   C('id_type','text',['nn']),C('id_value','text',['uk','nn']),C('is_primary','boolean'),C('created_at','timestamptz')]),
+ T('device','device_status',{note:'Status lookup (ACTIVE/OFFLINE/…).',ret:'Long-term'},[
+   C('status_code','text',['pk']),C('description','text'),C('is_active','boolean')]),
+ T('device','device_current_state',{note:'1:1 mutable live snapshot — small & hot. No history here.',ret:'Live'},[
+   C('device_id','uuid',['pk','fk'],'device.devices'),C('connection_status','text'),C('last_seen_at','timestamptz'),
+   C('last_transaction_at','timestamptz'),C('last_mqtt_message_at','timestamptz'),C('last_shadow_update_at','timestamptz'),
+   C('firmware_version','text'),C('signal_strength','integer'),C('network_status','text'),C('error_status','text'),C('updated_at','timestamptz')]),
+ T('device','device_configuration',{note:'Current applied config (1:1).',ret:'Long-term'},[
+   C('device_id','uuid',['pk','fk'],'device.devices'),C('config','jsonb'),C('config_version','integer'),
+   C('applied_at','timestamptz'),C('updated_at','timestamptz')]),
+ T('device','device_configuration_history',{note:'Append-only config changes.',ret:'180 days'},[
+   C('config_history_id','bigint',['pk']),C('device_id','uuid',['fk'],'device.devices'),C('config','jsonb'),
+   C('config_version','integer'),C('changed_by','uuid',['fk'],'core.users'),C('source','text'),
+   C('correlation_id','uuid'),C('created_at','timestamptz',['nn'])]),
+ T('device','device_firmware',{note:'Firmware catalog per type.',ret:'Long-term'},[
+   C('firmware_id','integer',['pk']),C('device_type_id','integer',['fk'],'device.device_types'),
+   C('version','text',['uk']),C('release_notes','text'),C('s3_key','text'),C('is_active','boolean'),C('created_at','timestamptz')]),
+ T('device','device_firmware_history',{note:'Per-device firmware transitions.',ret:'180 days'},[
+   C('fw_history_id','bigint',['pk']),C('device_id','uuid',['fk'],'device.devices'),C('firmware_id','integer',['fk'],'device.device_firmware'),
+   C('from_version','text'),C('to_version','text'),C('status','text'),C('correlation_id','uuid'),C('created_at','timestamptz')]),
+ T('device','device_assignments',{note:'Ownership/custody over time.',ret:'Long-term'},[
+   C('assignment_id','bigint',['pk']),C('device_id','uuid',['fk'],'device.devices'),C('organization_id','uuid',['fk'],'core.organizations'),
+   C('assigned_by','uuid',['fk'],'core.users'),C('assigned_at','timestamptz'),C('unassigned_at','timestamptz'),C('reason','text')]),
+ T('device','device_logs',{note:'Operational events only (not raw MQTT). Monthly partitions.',part:true,ret:'90–180 days'},[
+   C('log_id','bigint',['pk']),C('device_id','uuid',['fk'],'device.devices'),C('organization_id','uuid',['fk'],'core.organizations'),
+   C('event_type','text',['nn']),C('severity','text'),C('message','text'),C('details','jsonb'),
+   C('correlation_id','uuid'),C('created_at','timestamptz',['pk','nn'])]),
+ /* transaction */
+ T('transaction','transaction_types',{note:'Type lookup (SALE/REFUND/…).',ret:'Long-term'},[
+   C('transaction_type_id','integer',['pk']),C('code','text',['uk']),C('name','text'),C('direction','text'),C('created_at','timestamptz')]),
+ T('transaction','transaction_statuses',{note:'Status lookup + terminal flag.',ret:'Long-term'},[
+   C('status_code','text',['pk']),C('description','text'),C('is_terminal','boolean'),C('sort_order','integer')]),
+ T('transaction','failure_codes',{note:'Configurable structured failure catalog.',ret:'Long-term'},[
+   C('failure_code','text',['pk']),C('category','text'),C('description','text'),C('is_retryable','boolean'),C('severity','text')]),
+ T('transaction','transactions',{note:'THE ledger. Monthly partitions. UK(org,idempotency_key,created_at).',part:true,ret:'13–24mo online, 7yr S3'},[
+   C('transaction_id','uuid',['pk']),C('organization_id','uuid',['fk','nn'],'core.organizations'),
+   C('device_id','uuid',['fk'],'device.devices'),C('transaction_type_id','integer',['fk'],'transaction.transaction_types'),
+   C('transaction_reference','text',['nn']),C('device_transaction_id','text'),C('idempotency_key','text',['uk','nn']),
+   C('amount','numeric(18,4)',['nn']),C('currency','char(3)',['nn']),C('status','text',['fk','nn'],'transaction.transaction_statuses'),
+   C('payment_provider_id','integer',['fk'],'payment.payment_providers'),C('provider_transaction_id','text'),
+   C('correlation_id','uuid'),C('requested_at','timestamptz',['nn']),C('completed_at','timestamptz'),
+   C('created_at','timestamptz',['pk','nn']),C('updated_at','timestamptz')]),
+ T('transaction','transaction_status_history',{note:'Append-only state trail. Partitioned.',part:true,ret:'13–24mo, 7yr S3'},[
+   C('id','bigint',['pk']),C('transaction_id','uuid',['fk','nn'],'transaction.transactions'),
+   C('old_status','text'),C('new_status','text',['nn']),C('changed_at','timestamptz',['pk','nn']),
+   C('source','text'),C('reason','text'),C('correlation_id','uuid')]),
+ T('transaction','transaction_attempts',{note:'Each processing attempt.',ret:'13 months'},[
+   C('attempt_id','bigint',['pk']),C('transaction_id','uuid',['fk'],'transaction.transactions'),
+   C('attempt_number','integer'),C('started_at','timestamptz'),C('ended_at','timestamptz'),C('result','text'),
+   C('provider_id','integer',['fk'],'payment.payment_providers'),C('correlation_id','uuid')]),
+ T('transaction','transaction_failures',{note:'Structured failures → failure_codes.',ret:'13 months'},[
+   C('failure_id','bigint',['pk']),C('transaction_id','uuid',['fk'],'transaction.transactions'),C('device_id','uuid',['fk'],'device.devices'),
+   C('failure_code','text',['fk'],'transaction.failure_codes'),C('provider_error_code','text'),C('error_message','text'),
+   C('retryable','boolean'),C('retry_count','integer'),C('first_failure_at','timestamptz'),C('last_failure_at','timestamptz'),
+   C('resolved_at','timestamptz'),C('correlation_id','uuid')]),
+ T('transaction','transaction_metadata',{note:'Heavy jsonb split off the hot row (1:1).',ret:'With txn'},[
+   C('transaction_id','uuid',['pk','fk'],'transaction.transactions'),C('metadata','jsonb'),C('tags','text[]'),C('created_at','timestamptz')]),
+ /* payment */
+ T('payment','payment_providers',{note:'Acquirers/gateways.',ret:'Long-term'},[
+   C('provider_id','integer',['pk']),C('code','text',['uk']),C('name','text'),C('status','text'),C('config','jsonb'),C('created_at','timestamptz')]),
+ T('payment','payment_methods',{note:'Method catalog per provider.',ret:'Long-term'},[
+   C('payment_method_id','integer',['pk']),C('code','text',['uk']),C('name','text'),
+   C('provider_id','integer',['fk'],'payment.payment_providers'),C('type','text'),C('is_active','boolean')]),
+ T('payment','payments',{note:'Provider-side money. 1:1 with txn. UK(provider,provider_txn_id).',ret:'Long-term'},[
+   C('payment_id','uuid',['pk']),C('transaction_id','uuid',['fk','nn'],'transaction.transactions'),
+   C('organization_id','uuid',['fk'],'core.organizations'),C('provider_id','integer',['fk'],'payment.payment_providers'),
+   C('payment_method_id','integer',['fk'],'payment.payment_methods'),C('amount','numeric(18,4)'),
+   C('fee_amount','numeric(18,4)'),C('net_amount','numeric(18,4)'),C('currency','char(3)'),C('status','text'),
+   C('provider_transaction_id','text',['uk']),C('authorized_at','timestamptz'),C('captured_at','timestamptz'),
+   C('created_at','timestamptz'),C('updated_at','timestamptz')]),
+ T('payment','payment_attempts',{note:'Retries against the provider.',ret:'13 months'},[
+   C('attempt_id','bigint',['pk']),C('payment_id','uuid',['fk'],'payment.payments'),C('attempt_number','integer'),
+   C('status','text'),C('provider_request_ref','text'),C('provider_response_code','text'),C('error_message','text'),
+   C('started_at','timestamptz'),C('ended_at','timestamptz'),C('correlation_id','uuid')]),
+ T('payment','payment_provider_responses',{note:'Sanitized raw responses. Short retention. No secrets.',ret:'30–90 days'},[
+   C('response_id','bigint',['pk']),C('payment_id','uuid',['fk'],'payment.payments'),C('provider_id','integer',['fk'],'payment.payment_providers'),
+   C('http_status','integer'),C('response_code','text'),C('raw_response','jsonb'),C('received_at','timestamptz'),C('correlation_id','uuid')]),
+ /* reconciliation */
+ T('reconciliation','reconciliation_batches',{note:'One provider file import.',ret:'Long-term'},[
+   C('batch_id','uuid',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('provider_id','integer',['fk'],'payment.payment_providers'),
+   C('business_date','date'),C('source_file_s3_key','text'),C('status','text'),C('total_records','integer'),
+   C('matched_count','integer'),C('exception_count','integer'),C('started_at','timestamptz'),C('completed_at','timestamptz'),
+   C('created_by','uuid',['fk'],'core.users'),C('created_at','timestamptz')]),
+ T('reconciliation','reconciliation_records',{note:'Per-line match result.',ret:'Long-term'},[
+   C('recon_record_id','bigint',['pk']),C('batch_id','uuid',['fk'],'reconciliation.reconciliation_batches'),
+   C('transaction_id','uuid',['fk'],'transaction.transactions'),C('payment_id','uuid',['fk'],'payment.payments'),
+   C('provider_reference','text'),C('provider_amount','numeric(18,4)'),C('tms_amount','numeric(18,4)'),
+   C('match_status','text',['nn']),C('settlement_id','uuid',['fk'],'settlement.settlement_batches'),C('created_at','timestamptz')]),
+ T('reconciliation','reconciliation_exceptions',{note:'Non-matched records needing action.',ret:'Long-term'},[
+   C('exception_id','bigint',['pk']),C('recon_record_id','bigint',['fk'],'reconciliation.reconciliation_records'),
+   C('batch_id','uuid',['fk'],'reconciliation.reconciliation_batches'),C('exception_type','text'),C('description','text'),
+   C('resolution_status','text'),C('resolved_by','uuid',['fk'],'core.users'),C('resolved_at','timestamptz'),C('notes','text'),C('created_at','timestamptz')]),
+ /* settlement */
+ T('settlement','settlement_batches',{note:'Provider payout batch. UK(settlement_reference).',ret:'Long-term'},[
+   C('settlement_batch_id','uuid',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('provider_id','integer',['fk'],'payment.payment_providers'),
+   C('settlement_date','date'),C('currency','char(3)'),C('total_amount','numeric(18,4)'),C('total_fee','numeric(18,4)'),
+   C('net_amount','numeric(18,4)'),C('transaction_count','integer'),C('settlement_reference','text',['uk']),C('status','text'),C('created_at','timestamptz')]),
+ T('settlement','settlement_records',{note:'Links txns to a settlement (no ledger duplication).',ret:'Long-term'},[
+   C('settlement_record_id','bigint',['pk']),C('settlement_batch_id','uuid',['fk'],'settlement.settlement_batches'),
+   C('transaction_id','uuid',['fk'],'transaction.transactions'),C('payment_id','uuid',['fk'],'payment.payments'),
+   C('gross_amount','numeric(18,4)'),C('fee_amount','numeric(18,4)'),C('net_amount','numeric(18,4)'),C('status','text'),C('created_at','timestamptz')]),
+ /* configuration */
+ T('configuration','business_configuration',{note:'Global or per-tenant config. UK(org,key).',ret:'Long-term'},[
+   C('config_id','integer',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('config_key','text',['uk','nn']),
+   C('config_value','jsonb'),C('description','text'),C('effective_from','timestamptz'),C('effective_to','timestamptz'),
+   C('created_by','uuid',['fk'],'core.users'),C('created_at','timestamptz'),C('updated_at','timestamptz')]),
+ /* notification */
+ T('notification','notification_logs',{note:'Outbound SMS/EMAIL/PUSH/DASHBOARD.',ret:'90–180 days'},[
+   C('notification_id','bigint',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('type','text'),C('channel','text'),
+   C('recipient','text'),C('related_entity_type','text'),C('related_entity_id','uuid'),C('status','text'),C('provider','text'),
+   C('provider_reference','text'),C('sent_at','timestamptz'),C('failed_at','timestamptz'),C('retry_count','integer'),
+   C('error_message','text'),C('correlation_id','uuid'),C('created_at','timestamptz')]),
+ /* alert */
+ T('alert','alert_rules',{note:'Configurable conditions, not per-log.',ret:'Long-term'},[
+   C('alert_rule_id','integer',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('name','text'),C('alert_type','text'),
+   C('condition','jsonb'),C('severity','text'),C('channels','text[]'),C('is_active','boolean'),C('cooldown_seconds','integer'),
+   C('created_by','uuid',['fk'],'core.users'),C('created_at','timestamptz'),C('updated_at','timestamptz')]),
+ T('alert','alerts',{note:'Fired alert instances.',ret:'12 months'},[
+   C('alert_id','bigint',['pk']),C('alert_rule_id','integer',['fk'],'alert.alert_rules'),C('organization_id','uuid',['fk'],'core.organizations'),
+   C('entity_type','text'),C('entity_id','uuid'),C('severity','text'),C('status','text'),C('title','text'),C('details','jsonb'),
+   C('triggered_at','timestamptz'),C('acknowledged_by','uuid',['fk'],'core.users'),C('acknowledged_at','timestamptz'),
+   C('resolved_at','timestamptz'),C('correlation_id','uuid'),C('created_at','timestamptz')]),
+ T('alert','alert_history',{note:'Alert status transitions.',ret:'12 months'},[
+   C('alert_history_id','bigint',['pk']),C('alert_id','bigint',['fk'],'alert.alerts'),C('old_status','text'),C('new_status','text'),
+   C('changed_by','uuid',['fk'],'core.users'),C('note','text'),C('changed_at','timestamptz')]),
+ /* audit */
+ T('audit','audit_logs',{note:'Append-only security/business trail. Monthly partitions.',part:true,ret:'12–24mo, 7yr'},[
+   C('audit_id','bigint',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('user_id','uuid',['fk'],'core.users'),
+   C('action','text',['nn']),C('entity_type','text'),C('entity_id','text'),C('old_value','jsonb'),C('new_value','jsonb'),
+   C('ip_address','inet'),C('user_agent','text'),C('correlation_id','uuid'),C('created_at','timestamptz',['pk','nn'])]),
+ /* logging */
+ T('logging','api_request_logs',{note:'Optional, compliance-only. Sampled. No secrets. Partitioned.',part:true,ret:'7–30 days'},[
+   C('request_log_id','bigint',['pk']),C('organization_id','uuid',['fk'],'core.organizations'),C('user_id','uuid',['fk'],'core.users'),
+   C('method','text'),C('path','text'),C('status_code','integer'),C('duration_ms','integer'),C('request_id','uuid'),
+   C('correlation_id','uuid'),C('ip_address','inet'),C('created_at','timestamptz',['pk','nn'])]),
+ /* reporting */
+ T('reporting','txn_daily_stats',{note:'Pre-aggregated dashboard source (matview / continuous agg).',ret:'Indefinite'},[
+   C('organization_id','uuid',['fk'],'core.organizations'),C('business_date','date',['pk']),C('provider_id','integer',['fk'],'payment.payment_providers'),
+   C('total_count','bigint'),C('success_count','bigint'),C('failed_count','bigint'),C('pending_count','bigint'),
+   C('total_amount','numeric(20,4)'),C('success_rate','numeric(5,2)')]),
+ T('reporting','device_txn_daily',{note:'Per-device daily rollup.',ret:'Indefinite'},[
+   C('device_id','uuid',['fk'],'device.devices'),C('business_date','date',['pk']),C('txn_count','bigint'),
+   C('success_count','bigint'),C('failed_count','bigint'),C('amount','numeric(20,4)')]),
+];
+
+/* ---------- attribution: created_by/updated_by/updated_at on human-editable tables ---------- */
+const id = t => t.schema+'.'+t.name;
+const ATTRIBUTED = ['core.organizations','core.users','core.roles','device.device_types',
+ 'device.device_models','device.devices','device.device_configuration','device.device_firmware',
+ 'payment.payment_providers','payment.payment_methods','settlement.settlement_batches',
+ 'configuration.business_configuration','alert.alert_rules','reconciliation.reconciliation_batches'];
+ATTRIBUTED.forEach(tid=>{
+  const t = TABLES.find(x=>id(x)===tid); if(!t)return;
+  const has = n => t.cols.some(c=>c.n===n);
+  if(!has('updated_at')) t.cols.push(C('updated_at','timestamptz',['nn']));
+  if(!has('created_by')) t.cols.push(C('created_by','uuid',['fk'],'core.users'));
+  if(!has('updated_by')) t.cols.push(C('updated_by','uuid',['fk'],'core.users'));
+});
+
+/* ---------- build incoming ref index ---------- */
+const incoming = {};
+TABLES.forEach(t=>{ t.cols.forEach(c=>{ if(c.ref){ (incoming[c.ref]=incoming[c.ref]||[]).push({from:id(t),col:c.n}); } }); });
+
+/* ---------- render legend ---------- */
+const legendEl = document.getElementById('legend');
+const activeSchemas = new Set(Object.keys(SCHEMAS));
+Object.entries(SCHEMAS).forEach(([k,v])=>{
+  const el=document.createElement('div'); el.className='lg'; el.dataset.s=k;
+  el.innerHTML=`<span class="dot" style="background:${v.c}"></span><span>${k}</span>`;
+  el.title=v.d;
+  el.onclick=()=>{ el.classList.toggle('off'); if(activeSchemas.has(k))activeSchemas.delete(k); else activeSchemas.add(k); applyFilter(); };
+  legendEl.appendChild(el);
+});
+
+/* ---------- render explorer ---------- */
+const exp = document.getElementById('explorer');
+function tagHtml(keys){
+  let h=''; if(keys.includes('pk'))h+='<span class="tag pk">PK</span>';
+  if(keys.includes('fk'))h+='<span class="tag fk">FK</span>';
+  if(keys.includes('uk'))h+='<span class="tag uk">UK</span>'; return h;
+}
+TABLES.forEach(t=>{
+  const el=document.createElement('div'); el.className='tbl'; el.id='t-'+id(t);
+  el.style.setProperty('--sc',SCHEMAS[t.schema].c);
+  el.dataset.schema=t.schema; el.dataset.name=t.name;
+  let flags=''; if(t.part)flags+='<span class="tag part">PART</span>';
+  if(t.schema==='reporting')flags+='<span class="tag agg">AGG</span>';
+  const colsHtml=t.cols.map(c=>{
+    const fk = c.ref? `<span class="fkchip" data-goto="${c.ref}" title="references ${c.ref}">→ ${c.ref.split('.')[1]}</span>`:'';
+    return `<li class="col" data-col="${c.n}">
+      <span class="cn">${c.n}</span>
+      <span class="keys">${tagHtml(c.keys)}</span>
+      ${fk}
+      <span class="ct">${c.t}</span></li>`;
+  }).join('');
+  el.innerHTML=`
+    <div class="head" data-sel="${id(t)}">
+      <div><div class="tschema">${t.schema}</div><div class="tname">${t.name}</div></div>
+      <div class="flags">${flags}</div>
+    </div>
+    <ul class="cols">${colsHtml}</ul>
+    <div class="foot"><span><b>${t.cols.length}</b> cols</span><span><b>Retention:</b> ${t.ret}</span>${t.note?`<span>${t.note}</span>`:''}</div>`;
+  exp.appendChild(el);
+});
+document.getElementById('count').textContent = TABLES.length+' tables';
+
+/* ---------- interactions: select / relations ---------- */
+const panel=document.getElementById('relpanel');
+function clearSel(){
+  document.querySelectorAll('.tbl').forEach(e=>e.classList.remove('sel','rel','dim'));
+  panel.classList.remove('show');
+}
+function selectTable(tid){
+  const t=TABLES.find(x=>id(x)===tid); if(!t)return;
+  const out=t.cols.filter(c=>c.ref).map(c=>({to:c.ref,col:c.n}));
+  const inc=incoming[tid]||[];
+  const related=new Set([tid,...out.map(o=>o.to),...inc.map(i=>i.from)]);
+  document.querySelectorAll('.tbl').forEach(e=>{
+    const eid=e.id.slice(2);
+    e.classList.toggle('sel',eid===tid);
+    e.classList.toggle('rel',related.has(eid)&&eid!==tid);
+    e.classList.toggle('dim',!related.has(eid));
+  });
+  // panel
+  document.getElementById('reltitle').textContent=t.schema+'.'+t.name;
+  let html='';
+  html+='<div class="rl">References →</div>';
+  html+= out.length? out.map(o=>`<span class="ri" data-goto="${o.to}"><span class="via">${o.col} →</span> ${o.to}</span>`).join('') : '<span class="ri via">none</span>';
+  html+='<div class="rl">← Referenced by</div>';
+  html+= inc.length? inc.map(i=>`<span class="ri" data-goto="${i.from}">${i.from} <span class="via">(${i.col})</span></span>`).join('') : '<span class="ri via">none</span>';
+  document.getElementById('relbody').innerHTML=html;
+  panel.classList.add('show');
+}
+function goto(tid){
+  const el=document.getElementById('t-'+tid); if(!el)return;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  selectTable(tid);
+}
+exp.addEventListener('click',e=>{
+  const head=e.target.closest('[data-sel]');
+  const chip=e.target.closest('[data-goto]');
+  if(chip){ e.stopPropagation(); goto(chip.dataset.goto); return; }
+  if(head){ selectTable(head.dataset.sel); }
+});
+panel.addEventListener('click',e=>{ const g=e.target.closest('[data-goto]'); if(g)goto(g.dataset.goto); });
+document.getElementById('relclose').onclick=clearSel;
+document.getElementById('clearsel').onclick=()=>{ clearSel(); document.getElementById('search').value=''; applyFilter(); };
+
+/* ---------- search + schema filter ---------- */
+const searchEl=document.getElementById('search');
+function applyFilter(){
+  const q=searchEl.value.trim().toLowerCase();
+  let shown=0;
+  TABLES.forEach(t=>{
+    const el=document.getElementById('t-'+id(t));
+    const schemaOn=activeSchemas.has(t.schema);
+    let match = !q || t.name.toLowerCase().includes(q) || t.schema.includes(q);
+    el.querySelectorAll('.col').forEach(c=>{
+      const hit = q && c.dataset.col.toLowerCase().includes(q);
+      c.classList.toggle('hit',hit);
+      if(hit)match=true;
+    });
+    const visible = schemaOn && match;
+    el.classList.toggle('hidden',!visible);
+    if(visible)shown++;
+  });
+  document.getElementById('count').textContent=shown+' / '+TABLES.length+' tables';
+}
+searchEl.addEventListener('input',applyFilter);
+
+/* ---------- nav active state ---------- */
+const navlinks=[...document.querySelectorAll('.nav a')];
+const io=new IntersectionObserver(es=>{
+  es.forEach(en=>{ if(en.isIntersecting){
+    navlinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+en.target.id));
+  }});
+},{rootMargin:'-10% 0px -80% 0px'});
+document.querySelectorAll('main section').forEach(s=>io.observe(s));
+
+/* ---------- theme toggle ---------- */
+const root=document.documentElement, tb=document.getElementById('themebtn');
+const icon=document.getElementById('themeicon'), label=document.getElementById('themelabel');
+function sysDark(){return window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function setLabel(){ const d=root.getAttribute('data-theme')||(sysDark()?'dark':'light');
+  icon.textContent=d==='dark'?'●':'○'; label.textContent=d==='dark'?'Dark':'Light'; }
+tb.onclick=()=>{ const cur=root.getAttribute('data-theme')||(sysDark()?'dark':'light');
+  root.setAttribute('data-theme',cur==='dark'?'light':'dark'); setLabel(); };
+setLabel();
+</script>

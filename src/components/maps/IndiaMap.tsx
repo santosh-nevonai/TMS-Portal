@@ -155,7 +155,7 @@ function StatRow({ dot, label, value }: { dot: string; label: string; value: num
 // ---------------------------------------------------------------------------
 // Main map
 // ---------------------------------------------------------------------------
-export function IndiaMap() {
+export function IndiaMap({ fullscreen = false }: { fullscreen?: boolean }) {
   const [states, setStates] = useState<FeatureCollection | null>(null);
   const [districts, setDistricts] = useState<FeatureCollection | null>(null);
   const [distStats, setDistStats] = useState<Map<string, AreaStat> | null>(null);
@@ -220,7 +220,7 @@ export function IndiaMap() {
   const shown = hover ?? pinned;
 
   return (
-    <div className="relative h-[460px] w-full overflow-hidden rounded-lg border border-line">
+    <div className={cn('relative w-full overflow-hidden rounded-lg border border-line', fullscreen ? 'h-full min-h-[460px]' : 'h-[460px]')}>
       <MapContainer
         center={INDIA_CENTER}
         zoom={5}

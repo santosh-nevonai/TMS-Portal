@@ -15,8 +15,8 @@ export interface DemoUser {
 // Dummy credentials — safe to display on the login screen.
 export const DEMO_USERS: DemoUser[] = [
   { email: 'admin@nevonai.com',    password: 'Admin@123',   name: 'Santosh Kumar', role: 'Operations Admin',    initials: 'SK' },
-  { email: 'approver@nevonai.com', password: 'Approve@123', name: 'Anjali Rao',    role: 'Campaign Approver',   initials: 'AR' },
-  { email: 'viewer@nevonai.com',   password: 'Viewer@123',  name: 'Priya Nair',    role: 'Read-only Analyst',   initials: 'PN' },
+  // { email: 'approver@nevonai.com', password: 'Approve@123', name: 'Anjali Rao',    role: 'Campaign Approver',   initials: 'AR' },
+  // { email: 'viewer@nevonai.com',   password: 'Viewer@123',  name: 'Priya Nair',    role: 'Read-only Analyst',   initials: 'PN' },
 ];
 
 export interface Session {

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Cpu, Wifi, WifiOff, WrenchIcon, BatteryLow, PackageX,
-  RefreshCw, ChevronDown, ArrowRight, MapPin,
+  RefreshCw, ChevronDown, ArrowRight, MapPin, Maximize2, Minimize2,
   AlertOctagon, TriangleAlert, Info, CircleDot,
   Radio, Megaphone, LifeBuoy, HardDriveDownload, ShieldAlert, RotateCw, UserCog, Store,
 } from 'lucide-react';
@@ -155,18 +156,7 @@ export default function Overview() {
 
       {/* ROW 3: Map + Alerts */}
       <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader
-            title="Regional Distribution"
-            subtitle="Device distribution and health across India"
-            icon={<MapPin size={15} />}
-            action={<Button variant="ghost" size="sm" onClick={() => {}}>State view <ChevronDown size={13} /></Button>}
-          />
-          <div className="grid grid-cols-1 gap-2 p-4 md:grid-cols-[minmax(0,1fr)_240px]">
-            <IndiaMap />
-            <RegionRankList />
-          </div>
-        </Card>
+        <RegionalDistribution />
 
         <AlertsSnapshot />
       </div>
@@ -188,6 +178,65 @@ export default function Overview() {
 }
 
 // ---------------------------------------------------------------- Region rank
+function RegionalDistribution() {
+  const [full, setFull] = useState(false);
+
+  // Exit full screen on Escape and lock body scroll while open.
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFull(false);
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [full]);
+
+  const card = (
+    <Card className={cn(full ? 'flex h-full flex-col' : 'lg:col-span-2')}>
+      <CardHeader
+        title="Regional Distribution"
+        subtitle="Device distribution and health across India"
+        icon={<MapPin size={15} />}
+        action={
+          <>
+            <Button variant="ghost" size="sm" onClick={() => {}}>State view <ChevronDown size={13} /></Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setFull((f) => !f)}
+              aria-label={full ? 'Exit full screen' : 'View full screen'}
+              title={full ? 'Exit full screen (Esc)' : 'View full screen'}
+            >
+              {full ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </Button>
+          </>
+        }
+      />
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-2 p-4',
+          full ? 'min-h-0 flex-1 md:grid-cols-[minmax(0,1fr)_280px]' : 'md:grid-cols-[minmax(0,1fr)_240px]',
+        )}
+      >
+        <IndiaMap fullscreen={full} />
+        <div className={full ? 'min-h-0 overflow-y-auto' : undefined}>
+          <RegionRankList />
+        </div>
+      </div>
+    </Card>
+  );
+
+  if (full) {
+    return createPortal(
+      <div className="fixed inset-0 z-[1000] bg-canvas/95 p-4 backdrop-blur-sm">{card}</div>,
+      document.body,
+    );
+  }
+  return card;
+}
+
 function RegionRankList() {
   const navigate = useNavigate();
   const list = [

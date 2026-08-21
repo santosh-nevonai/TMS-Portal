@@ -200,6 +200,39 @@
     background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
     background-size: 22px 22px;
   }
+
+  /* ---- Login: 3D Payment Audio device scene ------------------------- */
+  .scene-3d {
+    perspective: 1300px;
+    perspective-origin: 50% 40%;
+  }
+  .box-3d {
+    transform-style: preserve-3d;
+    animation: box-spin 20s linear infinite;
+  }
+  @keyframes box-spin {
+    from { transform: rotateX(-18deg) rotateY(0deg); }
+    to   { transform: rotateX(-18deg) rotateY(360deg); }
+  }
+  /* Each face is centred, then rotated + pushed out along its normal. */
+  .face-3d {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+  }
+  /* subtle grain of light sweeping the screen */
+  .screen-sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.14) 48%, transparent 62%);
+    transform: translateX(-120%);
+    animation: sheen 4.5s ease-in-out infinite;
+  }
+  @keyframes sheen {
+    0%, 60% { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  }
 }
 
 /* ---- Leaflet map: permanent count labels + chrome tweaks ---- */
