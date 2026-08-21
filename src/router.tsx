@@ -1,6 +1,8 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom';
+import type { ReactElement } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Placeholder } from '@/components/common/Placeholder';
+import { isAuthenticated } from '@/lib/auth';
 
 import Login from '@/pages/Login';
 import Overview from '@/pages/Overview';
@@ -31,11 +33,23 @@ import Integrations from '@/pages/Integrations';
 import Analytics from '@/pages/Analytics';
 import Assistant from '@/pages/Assistant';
 
+function RequireAuth({ children }: { children: ReactElement }) {
+  const location = useLocation();
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+  return children;
+}
+
 export const router = createBrowserRouter([
   { path: '/login', element: <Login /> },
   {
     path: '/',
-    element: <AppLayout />,
+    element: (
+      <RequireAuth>
+        <AppLayout />
+      </RequireAuth>
+    ),
     children: [
       { index: true, element: <Overview /> },
       { path: 'devices', element: <Devices /> },
@@ -67,4 +81,14 @@ export const router = createBrowserRouter([
       { path: '*', element: <Placeholder title="Not found" subtitle="The page you are looking for does not exist." /> },
     ],
   },
-]);
+], {
+  // Opt in to React Router v7 data-router behavior early — silences the
+  // future-flag warnings. (v7_startTransition is set on <RouterProvider>.)
+  future: {
+    v7_relativeSplatPath: true,
+    v7_fetcherPersist: true,
+    v7_normalizeFormMethod: true,
+    v7_partialHydration: true,
+    v7_skipActionErrorRevalidation: true,
+  },
+});

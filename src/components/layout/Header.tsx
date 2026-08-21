@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Bell, Sparkles, ChevronDown, PanelLeft, Circle, Sun, Moon } from 'lucide-react';
 import { Kbd, IconButton, Avatar } from '@/components/ui/primitives';
 import { CURRENT_USER } from '@/data/mock';
+import { getSession, logout } from '@/lib/auth';
 import { CommandPalette } from './CommandPalette';
 import { NotificationDrawer } from './NotificationDrawer';
 import { ThemeControls } from '@/components/theme/ThemeControls';
@@ -18,6 +19,12 @@ export function Header({ onMenu }: { onMenu: () => void }) {
   const userRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
   const { resolved } = useTheme();
+  const user = getSession() ?? CURRENT_USER;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -124,18 +131,18 @@ export function Header({ onMenu }: { onMenu: () => void }) {
             onClick={() => setUserOpen((o) => !o)}
             className={cn('flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition-colors hover:bg-neutralst-50', userOpen && 'bg-neutralst-50')}
           >
-            <Avatar initials={CURRENT_USER.initials} size="md" />
+            <Avatar initials={user.initials} size="md" />
             <div className="hidden text-left leading-tight sm:block">
-              <div className="text-xs font-semibold text-ink-900">{CURRENT_USER.name}</div>
-              <div className="text-2xs text-ink-500">{CURRENT_USER.role}</div>
+              <div className="text-xs font-semibold text-ink-900">{user.name}</div>
+              <div className="text-2xs text-ink-500">{user.role}</div>
             </div>
             <ChevronDown size={14} className="hidden text-ink-400 sm:block" />
           </button>
           {userOpen && (
             <div className="absolute right-0 top-full z-50 mt-1.5 w-56 animate-fade-in rounded-xl border border-line bg-white p-1.5 shadow-pop">
               <div className="border-b border-line px-2.5 py-2">
-                <div className="text-[13px] font-semibold text-ink-900">{CURRENT_USER.name}</div>
-                <div className="text-2xs text-ink-500">{CURRENT_USER.email}</div>
+                <div className="text-[13px] font-semibold text-ink-900">{user.name}</div>
+                <div className="text-2xs text-ink-500">{user.email}</div>
               </div>
               <div className="py-1">
                 {['Profile', 'Preferences', 'Security'].map((i) => (
@@ -145,7 +152,10 @@ export function Header({ onMenu }: { onMenu: () => void }) {
                 ))}
               </div>
               <div className="border-t border-line pt-1">
-                <button className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-danger-600 hover:bg-danger-50">
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center rounded-lg px-2.5 py-1.5 text-[13px] font-medium text-danger-600 hover:bg-danger-50"
+                >
                   Logout
                 </button>
               </div>
