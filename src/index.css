@@ -183,3 +183,42 @@
     background-size: 22px 22px;
   }
 }
+
+/* ---- Leaflet map: permanent count labels + chrome tweaks ---- */
+.leaflet-container {
+  font-family: inherit;
+}
+.leaflet-tooltip.mp-count {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  text-align: center;
+  line-height: 1.05;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.9),
+    0 0 2px rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+.leaflet-tooltip.mp-count::before {
+  display: none; /* hide the little pointer arrow */
+}
+.mp-count .mp-lbl-name {
+  display: block;
+  font-size: 9px;
+  font-weight: 600;
+  color: #334155;
+  letter-spacing: 0.01em;
+}
+.mp-count .mp-lbl-val {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+/* keep the +/- control on-brand and out from under overlays */
+.leaflet-control-zoom a {
+  color: #334155;
+}
